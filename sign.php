@@ -1,3 +1,15 @@
+<?php
+session_start();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if ($_POST['username'] === 'admin' && $_POST['password'] === 'admin') {
+        $_SESSION['admin_logged_in'] = true;
+        header("Location: home_page.php");
+        exit;
+    } else {
+        $error = "Invalid credentials. Use admin/admin.";
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -102,6 +114,12 @@ body{
 .box button:active{
     transform: translateY(0);
 }
+
+.error {
+    color: red;
+    text-align: center;
+    margin-bottom: 10px;
+}
 </style>
 </head>
 
@@ -110,16 +128,20 @@ body{
         <div class="card">
             <h3>LOGIN 🎣</h3>
             <h4>TO FISHER MAN</h4>
+            <?php if (!empty($error)): ?>
+                <div class="error"><?= htmlspecialchars($error) ?></div>
+            <?php endif; ?>
+            <form method="POST" action="sign.php">
+                <div class="box">
+                    <p>Username</p>
+                    <input type="text" name="username" id="username" placeholder="Enter your username" required>
 
-            <div class="box">
-                <p>Username</p>
-                <input type="text" name="username" id="username" placeholder="Enter your username">
+                    <p>Password</p>
+                    <input type="password" name="password" id="password" placeholder="Enter your password" required>
 
-                <p>Password</p>
-                <input type="password" name="password" id="password" placeholder="Enter your password">
-
-                <button type="submit">Login</button>
-            </div>
+                    <button type="submit">Login</button>
+                </div>
+            </form>
         </div>
     </div>
 </body>
