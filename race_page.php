@@ -1,4 +1,5 @@
 <?php
+require_once 'auth_check.php';
 require_once 'db_connect.php';
 
 $match_id = $_GET['match_id'] ?? 0;
@@ -74,6 +75,7 @@ $teams = $teams->fetchAll();
             </div>
 
             <div class="btu-box">
+                <a href="home_page.php" style="text-decoration: none;"><button type="button">Home</button></a>
                 <form method="GET" action="race_page.php" style="display:inline;">
                     <input type="hidden" name="match_id" value="<?= htmlspecialchars($match_id) ?>">
                     <input type="hidden" name="tab" value="dashboard">

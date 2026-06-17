@@ -1,4 +1,5 @@
 <?php
+require_once 'auth_check.php';
 require_once 'db_connect.php';
 
 // Handle creating a new match
@@ -31,6 +32,7 @@ $matches = $stmt->fetchAll();
         <div class="col-1">
 
             <h1>FISHER MAN</h1>
+            <a href="logout.php" style="color: #4b5563; text-decoration: none; font-size: 14px; margin-top: 10px; display: block;">Logout</a>
         </div>
         <div class="col-2">
             <div class="menu">

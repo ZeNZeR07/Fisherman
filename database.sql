@@ -43,3 +43,7 @@ CREATE TABLE IF NOT EXISTS admin_user (
     password VARCHAR(255) NOT NULL
 );
 
+-- Insert default admin user (username: admin, password: admin)
+-- Using a simple string for now as per request, but recommending hashing for production.
+INSERT INTO admin_user (username, password) VALUES ('admin', 'admin');
+
