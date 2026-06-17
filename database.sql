@@ -36,3 +36,10 @@ CREATE TABLE IF NOT EXISTS catch_logs (
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
     FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS admin_user (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+

@@ -1,12 +1,21 @@
 <?php
 session_start();
+require_once 'db_connect.php';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if ($_POST['username'] === 'admin' && $_POST['password'] === 'admin') {
+    $username = $_POST['username'] ?? '';
+    $password = $_POST['password'] ?? '';
+
+    $stmt = $pdo->prepare("SELECT * FROM admin_user WHERE username = ?");
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
+
+    if ($user && $password === $user['password']) {
         $_SESSION['admin_logged_in'] = true;
         header("Location: home_page.php");
         exit;
     } else {
-        $error = "Invalid credentials. Use admin/admin.";
+        $error = "Invalid credentials. Please try again.";
     }
 }
 ?>
