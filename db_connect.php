@@ -2,7 +2,7 @@
 $host = '127.0.0.1';
 $db   = 'fisherman_db';
 $user = 'root';
-$pass = '';
+$pass = 'ifconfig';
 $charset = 'utf8mb4';
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
