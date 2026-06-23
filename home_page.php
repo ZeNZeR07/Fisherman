@@ -48,6 +48,7 @@ $matches = $stmt->fetchAll();
                 <table>
                     <tr>
                         <th>RACE NAME</th>
+                        <Th>DATE</Th> //เพิ่มวันที่ในการแข่ง d/m/y
                         <th>STATUS</th>
                     </tr>
                     <?php if (count($matches) > 0): ?>

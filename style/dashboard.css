@@ -1,0 +1,91 @@
+/* Reset */
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Background */
+body{
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f4f6f9, #dfe9f3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Container */
+.container{
+    width: 100%;
+    max-width: 1000px;
+}
+
+/* Card */
+.card{
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+/* Title */
+.card h2{
+    text-align: center;
+    color: #1e293b;
+    margin-bottom: 25px;
+    font-size: 2rem;
+}
+
+/* Table */
+table{
+    width: 100%;
+    border-collapse: collapse;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+/* Header */
+th{
+    background: #2563eb;
+    color: white;
+    padding: 15px;
+    font-size: 16px;
+}
+
+/* Data */
+td{
+    padding: 14px;
+    text-align: center;
+    border-bottom: 1px solid #e5e7eb;
+    color: #374151;
+}
+
+/* Hover */
+tr:not(:first-child):hover{
+    background-color: #f8fafc;
+    transition: 0.3s;
+}
+
+/* Zebra */
+tr:nth-child(even){
+    background-color: #f9fafb;
+}
+
+/* Responsive */
+@media (max-width: 768px){
+    .card{
+        padding: 20px;
+    }
+
+    th,
+    td{
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .card h2{
+        font-size: 1.5rem;
+    }
+}
