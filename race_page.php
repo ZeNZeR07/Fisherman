@@ -18,18 +18,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     if ($action === 'start_race') {
         $pdo->prepare("UPDATE matches SET status = 'live' WHERE id = ?")->execute([$match_id]);
-    } elseif ($action === 'add_category') {
+    } elseif ($action === 'stop_race') {
+        $pdo->prepare("UPDATE matches SET status = 'stopped' WHERE id = ?")->execute([$match_id]);
+    } elseif ($action === 'add_category' && $match['status'] !== 'stopped') {
         $name = $_POST['name'];
         $min_weight = $_POST['min_weight'];
         $prize_quota = $_POST['prize_quota'];
         $pdo->prepare("INSERT INTO categories (match_id, name, min_weight, prize_quota) VALUES (?, ?, ?, ?)")
             ->execute([$match_id, $name, $min_weight, $prize_quota]);
-    } elseif ($action === 'add_team') {
+    } elseif ($action === 'add_team' && $match['status'] !== 'stopped') {
         $team_name = $_POST['team_name'];
         $seq = $_POST['sequence_number'];
         $pdo->prepare("INSERT INTO teams (match_id, sequence_number, team_name) VALUES (?, ?, ?)")
             ->execute([$match_id, $seq, $team_name]);
-    } elseif ($action === 'add_catch') {
+    } elseif ($action === 'add_catch' && $match['status'] !== 'stopped') {
         $cat_id = $_POST['category_id'];
         $team_id = $_POST['team_id'];
         $weight = $_POST['weight'];
@@ -82,10 +84,23 @@ $teams = $teams->fetchAll();
                     <button type="submit" class="<?= $tab === 'dashboard' ? 'active-tab' : '' ?>">dashboard</button>
                 </form>
                 
+                <?php if ($match['status'] === 'pending'): ?>
                 <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=<?= htmlspecialchars($tab) ?>" style="display:inline;">
                     <input type="hidden" name="action" value="start_race">
-                    <button type="submit" <?= $match['status'] === 'live' ? 'disabled' : '' ?>><?= $match['status'] === 'live' ? 'Race is Live' : 'start race' ?></button>
+                    <button type="submit">start race</button>
                 </form>
+                <?php elseif ($match['status'] === 'live'): ?>
+                <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=<?= htmlspecialchars($tab) ?>" style="display:inline;">
+                    <input type="hidden" name="action" value="stop_race">
+                    <button type="submit">stop match</button>
+                </form>
+                <?php else: ?>
+                <button type="button" disabled>stopped</button>
+                <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=<?= htmlspecialchars($tab) ?>" style="display:inline;">
+                    <input type="hidden" name="action" value="start_race">
+                    <button type="submit">re-start match</button>
+                </form>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -98,6 +113,7 @@ $teams = $teams->fetchAll();
 
             <div class="show-detail">
                 <?php if ($tab === 'categories'): ?>
+                    <?php if ($match['status'] !== 'stopped'): ?>
                     <div class="form-container">
                         <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=categories">
                             <input type="hidden" name="action" value="add_category">
@@ -107,6 +123,7 @@ $teams = $teams->fetchAll();
                             <button type="submit">Add Category</button>
                         </form>
                     </div>
+                    <?php endif; ?>
                     <table>
                         <tr>
                             <th>ID</th>
@@ -125,6 +142,7 @@ $teams = $teams->fetchAll();
                     </table>
 
                 <?php elseif ($tab === 'teams'): ?>
+                    <?php if ($match['status'] !== 'stopped'): ?>
                     <div class="form-container">
                         <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=teams">
                             <input type="hidden" name="action" value="add_team">
@@ -133,6 +151,7 @@ $teams = $teams->fetchAll();
                             <button type="submit">Add Team</button>
                         </form>
                     </div>
+                    <?php endif; ?>
                     <table>
                         <tr>
                             <th>No</th>
@@ -147,6 +166,7 @@ $teams = $teams->fetchAll();
                     </table>
 
                 <?php elseif ($tab === 'logs'): ?>
+                    <?php if ($match['status'] !== 'stopped'): ?>
                     <div class="form-container">
                         <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=logs">
                             <input type="hidden" name="action" value="add_catch">
@@ -166,6 +186,7 @@ $teams = $teams->fetchAll();
                             <button type="submit">Add Log</button>
                         </form>
                     </div>
+                    <?php endif; ?>
                     <?php
                     $logs = $pdo->prepare("SELECT cl.*, t.team_name, c.name as cat_name FROM catch_logs cl 
                                            JOIN teams t ON cl.team_id = t.id 
@@ -175,17 +196,17 @@ $teams = $teams->fetchAll();
                     ?>
                     <table>
                         <tr>
-                            <th>Time</th>
                             <th>Team</th>
                             <th>Category</th>
                             <th>Weight</th>
+                            <th>Time</th>
                         </tr>
                         <?php foreach ($logs->fetchAll() as $log): ?>
                         <tr>
-                            <td><?= htmlspecialchars($log['caught_at']) ?></td>
                             <td><?= htmlspecialchars($log['team_name']) ?></td>
                             <td><?= htmlspecialchars($log['cat_name']) ?></td>
                             <td><?= htmlspecialchars($log['weight']) ?></td>
+                            <td><?= htmlspecialchars(date('H:i:s', strtotime($log['caught_at']))) ?></td>
                         </tr>
                         <?php endforeach; ?>
                     </table>

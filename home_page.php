@@ -43,7 +43,6 @@ $matches = $stmt->fetchAll();
     <div class="container">
     
         <div class="col-1">
-
             <h1>FISHER MAN</h1>
             
         </div>
@@ -77,22 +76,31 @@ $matches = $stmt->fetchAll();
             </div>
 
             <div class="border">
-                <table>
+                <table style="width: 100%; table-layout: fixed; border-collapse: collapse;">
                     <tr>
-                        <th>RACE NAME</th>
-                        <Th>DATE</Th>
-                        <th>STATUS</th>
+                        <th style="text-align: center; padding: 12px 15px;">RACE NAME</th>
+                        <th style="text-align: center; padding: 12px 15px;">DATE</th>
+                        <th style="text-align: center; padding: 12px 15px;">STATUS</th>
                     </tr>
                     <?php if (count($matches) > 0): ?>
                         <?php foreach ($matches as $match): ?>
                         <tr>
-                            <td><a href="race_page.php?match_id=<?= htmlspecialchars($match['id']) ?>" style="text-decoration: none; color: inherit;"><?= htmlspecialchars($match['name']) ?></a></td>
-                            <td><?= htmlspecialchars(ucfirst($match['status'])) ?></td>
+                            <td style="text-align: center; padding: 12px 15px;">
+                                <a href="race_page.php?match_id=<?= htmlspecialchars($match['id']) ?>" style="text-decoration: none; color: inherit;">
+                                    <?= htmlspecialchars($match['name']) ?>
+                                </a>
+                            </td>
+                            <td style="text-align: center; padding: 12px 15px;">
+                                <?= htmlspecialchars(date('d/m/Y', strtotime($match['created_at']))) ?>
+                            </td>
+                            <td style="text-align: center; padding: 12px 15px;">
+                                <?= htmlspecialchars(ucfirst($match['status'])) ?>
+                            </td>
                         </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="2" style="text-align: center;">No matches found</td>
+                            <td colspan="3" style="text-align: center; padding: 20px; color: #6b7280;">No matches found</td>
                         </tr>
                     <?php endif; ?>
                 </table>
