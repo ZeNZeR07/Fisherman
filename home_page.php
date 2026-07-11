@@ -12,8 +12,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_match') {
+    $delete_id = $_POST['match_id'] ?? 0;
+    if ($delete_id) {
+        $stmt = $pdo->prepare("DELETE FROM matches WHERE id = ?");
+        $stmt->execute([$delete_id]);
+    }
+    header("Location: home_page.php");
+    exit;
+}
+
 $stmt = $pdo->query("SELECT * FROM matches ORDER BY id DESC");
 $matches = $stmt->fetchAll();
+
+$status_labels = [
+    'pending' => 'รอลงเบ็ด',
+    'live'    => 'เปิดบ่อแล้ว',
+    'stopped' => 'เก็บเบ็ดแล้ว',
+];
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -81,6 +97,7 @@ $matches = $stmt->fetchAll();
                         <th style="text-align: center; padding: 12px 15px;">RACE NAME</th>
                         <th style="text-align: center; padding: 12px 15px;">DATE</th>
                         <th style="text-align: center; padding: 12px 15px;">STATUS</th>
+                        <th style="text-align: center; padding: 12px 15px;">ACTION</th>
                     </tr>
                     <?php if (count($matches) > 0): ?>
                         <?php foreach ($matches as $match): ?>
@@ -94,13 +111,20 @@ $matches = $stmt->fetchAll();
                                 <?= htmlspecialchars(date('d/m/Y', strtotime($match['created_at']))) ?>
                             </td>
                             <td style="text-align: center; padding: 12px 15px;">
-                                <?= htmlspecialchars(ucfirst($match['status'])) ?>
+                                <?= htmlspecialchars($status_labels[$match['status']] ?? ucfirst($match['status'])) ?>
+                            </td>
+                            <td style="text-align: center; padding: 12px 15px;">
+                                <form method="POST" style="display:inline;" onsubmit="return confirm('ลบการแข่งขัน &quot;<?= htmlspecialchars(addslashes($match['name'])) ?>&quot; ใช่หรือไม่? ข้อมูลทีม/ชนิดปลา/บันทึกน้ำหนักทั้งหมดจะถูกลบด้วย');">
+                                    <input type="hidden" name="action" value="delete_match">
+                                    <input type="hidden" name="match_id" value="<?= htmlspecialchars($match['id']) ?>">
+                                    <button type="submit" class="confirm-btn">ลบ</button>
+                                </form>
                             </td>
                         </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="3" style="text-align: center; padding: 20px; color: #6b7280;">No matches found</td>
+                            <td colspan="4" style="text-align: center; padding: 20px; color: #6b7280;">No matches found</td>
                         </tr>
                     <?php endif; ?>
                 </table>
