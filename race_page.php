@@ -2,54 +2,130 @@
 require_once 'auth_check.php';
 require_once 'db_connect.php';
 
-$match_id = $_GET['match_id'] ?? 0;
-if (!$match_id) {
-    die("Match ID not provided.");
+/* ==========================
+   เลือกการแข่งขันเริ่มต้น
+========================== */
+if (!isset($_GET['match_id'])) {
+
+    // ดึงการแข่งขันล่าสุด
+    $stmt = $pdo->query("SELECT id FROM matches ORDER BY id DESC LIMIT 1");
+    $defaultMatch = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($defaultMatch) {
+        header("Location: race_page.php?match_id=" . $defaultMatch['id']);
+        exit;
+    } else {
+        die("No matches found.");
+    }
 }
 
+$match_id = (int)$_GET['match_id'];
+
+/* ==========================
+   ดึงข้อมูลการแข่งขัน
+========================== */
 $stmt = $pdo->prepare("SELECT * FROM matches WHERE id = ?");
 $stmt->execute([$match_id]);
-$match = $stmt->fetch();
+$match = $stmt->fetch(PDO::FETCH_ASSOC);
+
 if (!$match) {
     die("Match not found.");
 }
 
+/* ==========================
+   POST Actions
+========================== */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
     $action = $_POST['action'] ?? '';
-    if ($action === 'start_race') {
-        $pdo->prepare("UPDATE matches SET status = 'live' WHERE id = ?")->execute([$match_id]);
-    } elseif ($action === 'add_category') {
-        $name = $_POST['name'];
-        $min_weight = $_POST['min_weight'];
-        $prize_quota = $_POST['prize_quota'];
-        $pdo->prepare("INSERT INTO categories (match_id, name, min_weight, prize_quota) VALUES (?, ?, ?, ?)")
-            ->execute([$match_id, $name, $min_weight, $prize_quota]);
-    } elseif ($action === 'add_team') {
-        $team_name = $_POST['team_name'];
-        $seq = $_POST['sequence_number'];
-        $pdo->prepare("INSERT INTO teams (match_id, sequence_number, team_name) VALUES (?, ?, ?)")
-            ->execute([$match_id, $seq, $team_name]);
-    } elseif ($action === 'add_catch') {
-        $cat_id = $_POST['category_id'];
-        $team_id = $_POST['team_id'];
-        $weight = $_POST['weight'];
-        $pdo->prepare("INSERT INTO catch_logs (match_id, category_id, team_id, weight) VALUES (?, ?, ?, ?)")
-            ->execute([$match_id, $cat_id, $team_id, $weight]);
+
+    switch ($action) {
+
+        case 'start_race':
+            $stmt = $pdo->prepare("
+                UPDATE matches
+                SET status='live'
+                WHERE id=?
+            ");
+            $stmt->execute([$match_id]);
+            break;
+
+        case 'add_category':
+            $stmt = $pdo->prepare("
+                INSERT INTO categories
+                (match_id, name, min_weight, prize_quota)
+                VALUES (?, ?, ?, ?)
+            ");
+
+            $stmt->execute([
+                $match_id,
+                trim($_POST['name']),
+                $_POST['min_weight'],
+                $_POST['prize_quota']
+            ]);
+            break;
+
+        case 'add_team':
+            $stmt = $pdo->prepare("
+                INSERT INTO teams
+                (match_id, sequence_number, team_name)
+                VALUES (?, ?, ?)
+            ");
+
+            $stmt->execute([
+                $match_id,
+                $_POST['sequence_number'],
+                trim($_POST['team_name'])
+            ]);
+            break;
+
+        case 'add_catch':
+            $stmt = $pdo->prepare("
+                INSERT INTO catch_logs
+                (match_id, category_id, team_id, weight)
+                VALUES (?, ?, ?, ?)
+            ");
+
+            $stmt->execute([
+                $match_id,
+                $_POST['category_id'],
+                $_POST['team_id'],
+                $_POST['weight']
+            ]);
+            break;
     }
-    header("Location: race_page.php?match_id=$match_id&tab=" . urlencode($_GET['tab'] ?? 'dashboard'));
+
+    header("Location: race_page.php?match_id={$match_id}&tab=" . urlencode($_GET['tab'] ?? 'dashboard'));
     exit;
 }
 
+/* ==========================
+   Tab
+========================== */
 $tab = $_GET['tab'] ?? 'dashboard';
 
-$categories = $pdo->prepare("SELECT * FROM categories WHERE match_id = ?");
-$categories->execute([$match_id]);
-$categories = $categories->fetchAll();
+/* ==========================
+   Categories
+========================== */
+$stmt = $pdo->prepare("
+    SELECT *
+    FROM categories
+    WHERE match_id = ?
+");
+$stmt->execute([$match_id]);
+$categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$teams = $pdo->prepare("SELECT * FROM teams WHERE match_id = ? ORDER BY sequence_number");
-$teams->execute([$match_id]);
-$teams = $teams->fetchAll();
-
+/* ==========================
+   Teams
+========================== */
+$stmt = $pdo->prepare("
+    SELECT *
+    FROM teams
+    WHERE match_id = ?
+    ORDER BY sequence_number
+");
+$stmt->execute([$match_id]);
+$teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -57,13 +133,10 @@ $teams = $teams->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Race Page</title>
-    <link rel="stylesheet" href="style/race_page.css">
+    <link rel="stylesheet" href="style/race_pageas.css">
     <style>
-        .form-container { margin-bottom: 20px; padding: 10px; background: #f9f9f9; border-radius: 5px;}
-        .form-container input, .form-container select { margin: 5px 0; padding: 5px; }
-        .form-container button { padding: 5px 10px; cursor: pointer; }
-        .nav-link { text-decoration: none; color: inherit; display: inline-block; padding: 5px 10px; }
-        .active-tab { font-weight: bold; background-color: #ddd; }
+        /* ---------- Card-style input form ---------- */
+
     </style>
 </head>
 <body>
@@ -81,7 +154,7 @@ $teams = $teams->fetchAll();
                     <input type="hidden" name="tab" value="dashboard">
                     <button type="submit" class="<?= $tab === 'dashboard' ? 'active-tab' : '' ?>">dashboard</button>
                 </form>
-                
+
                 <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=<?= htmlspecialchars($tab) ?>" style="display:inline;">
                     <input type="hidden" name="action" value="start_race">
                     <button type="submit" <?= $match['status'] === 'live' ? 'disabled' : '' ?>><?= $match['status'] === 'live' ? 'Race is Live' : 'start race' ?></button>
@@ -98,14 +171,34 @@ $teams = $teams->fetchAll();
 
             <div class="show-detail">
                 <?php if ($tab === 'categories'): ?>
-                    <div class="form-container">
+                    <button type="button" class="add-toggle-btn" onclick="toggleCard('overlay-add-category')">
+                        <span class="plus-icon">+</span>
+                    </button>
+                    <div class="modal-overlay" id="overlay-add-category" onclick="closeOnOverlay(event, 'overlay-add-category')">
+                    <div class="form-card" id="card-add-category">
+                        <button type="button" class="modal-close" onclick="toggleCard('overlay-add-category')">&times;</button>
+                        <h4>เพิ่มประเภทการแข่งขัน</h4>
                         <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=categories">
                             <input type="hidden" name="action" value="add_category">
-                            <input type="text" name="name" placeholder="Category Name (e.g. ปลานิล)" required>
-                            <input type="number" step="0.01" name="min_weight" placeholder="Min Weight" required>
-                            <input type="number" name="prize_quota" placeholder="Prize Quota" required>
-                            <button type="submit">Add Category</button>
+                            <div class="form-grid">
+                                <div class="form-field">
+                                    <label for="cat_name">ชื่อประเภท</label>
+                                    <input type="text" id="cat_name" name="name" placeholder="เช่น ปลานิล" required>
+                                </div>
+                                <div class="form-field">
+                                    <label for="cat_min_weight">น้ำหนักขั้นต่ำ (กก.)</label>
+                                    <input type="number" step="0.01" id="cat_min_weight" name="min_weight" placeholder="0.00" required>
+                                </div>
+                                <div class="form-field">
+                                    <label for="cat_prize_quota">จำนวนรางวัล</label>
+                                    <input type="number" id="cat_prize_quota" name="prize_quota" placeholder="0" required>
+                                </div>
+                            </div>
+                            <div class="btn-row">
+                                <button type="submit">เพิ่มประเภท</button>
+                            </div>
                         </form>
+                    </div>
                     </div>
                     <table>
                         <tr>
@@ -125,13 +218,30 @@ $teams = $teams->fetchAll();
                     </table>
 
                 <?php elseif ($tab === 'teams'): ?>
-                    <div class="form-container">
+                    <button type="button" class="add-toggle-btn" onclick="toggleCard('overlay-add-team')">
+                        <span class="plus-icon">+</span>
+                    </button>
+                    <div class="modal-overlay" id="overlay-add-team" onclick="closeOnOverlay(event, 'overlay-add-team')">
+                    <div class="form-card" id="card-add-team">
+                        <button type="button" class="modal-close" onclick="toggleCard('overlay-add-team')">&times;</button>
+                        <h4>เพิ่มทีม / นักตกปลา</h4>
                         <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=teams">
                             <input type="hidden" name="action" value="add_team">
-                            <input type="number" name="sequence_number" placeholder="No (Seq)" required>
-                            <input type="text" name="team_name" placeholder="Team/Angler Name" required>
-                            <button type="submit">Add Team</button>
+                            <div class="form-grid">
+                                <div class="form-field">
+                                    <label for="team_seq">หมายเลข (No)</label>
+                                    <input type="number" id="team_seq" name="sequence_number" placeholder="เช่น 1" required>
+                                </div>
+                                <div class="form-field">
+                                    <label for="team_name">ชื่อทีม/นักตกปลา</label>
+                                    <input type="text" id="team_name" name="team_name" placeholder="ชื่อทีม" required>
+                                </div>
+                            </div>
+                            <div class="btn-row">
+                                <button type="submit">เพิ่มทีม</button>
+                            </div>
                         </form>
+                    </div>
                     </div>
                     <table>
                         <tr>
@@ -147,24 +257,44 @@ $teams = $teams->fetchAll();
                     </table>
 
                 <?php elseif ($tab === 'logs'): ?>
-                    <div class="form-container">
+                    <button type="button" class="add-toggle-btn" onclick="toggleCard('overlay-add-log')">
+                        <span class="plus-icon">+</span> 
+                    </button>
+                    <div class="modal-overlay" id="overlay-add-log" onclick="closeOnOverlay(event, 'overlay-add-log')">
+                    <div class="form-card" id="card-add-log">
+                        <button type="button" class="modal-close" onclick="toggleCard('overlay-add-log')">&times;</button>
+                        <h4>บันทึกการจับปลา</h4>
                         <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=logs">
                             <input type="hidden" name="action" value="add_catch">
-                            <select name="team_id" required>
-                                <option value="">Select Team</option>
-                                <?php foreach ($teams as $team): ?>
-                                    <option value="<?= htmlspecialchars($team['id']) ?>"><?= htmlspecialchars($team['sequence_number'] . ' - ' . $team['team_name']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                            <select name="category_id" required>
-                                <option value="">Select Category</option>
-                                <?php foreach ($categories as $cat): ?>
-                                    <option value="<?= htmlspecialchars($cat['id']) ?>"><?= htmlspecialchars($cat['name']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                            <input type="number" step="0.01" name="weight" placeholder="Weight (kg)" required>
-                            <button type="submit">Add Log</button>
+                            <div class="form-grid">
+                                <div class="form-field">
+                                    <label for="log_team">ทีม</label>
+                                    <select id="log_team" name="team_id" required>
+                                        <option value="">เลือกทีม</option>
+                                        <?php foreach ($teams as $team): ?>
+                                            <option value="<?= htmlspecialchars($team['id']) ?>"><?= htmlspecialchars($team['sequence_number'] . ' - ' . $team['team_name']) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="form-field">
+                                    <label for="log_category">ประเภท</label>
+                                    <select id="log_category" name="category_id" required>
+                                        <option value="">เลือกประเภท</option>
+                                        <?php foreach ($categories as $cat): ?>
+                                            <option value="<?= htmlspecialchars($cat['id']) ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="form-field">
+                                    <label for="log_weight">น้ำหนัก (กก.)</label>
+                                    <input type="number" step="0.01" id="log_weight" name="weight" placeholder="0.00" required>
+                                </div>
+                            </div>
+                            <div class="btn-row">
+                                <button type="submit">บันทึก</button>
+                            </div>
                         </form>
+                    </div>
                     </div>
                     <?php
                     $logs = $pdo->prepare("SELECT cl.*, t.team_name, c.name as cat_name FROM catch_logs cl 
@@ -235,5 +365,37 @@ $teams = $teams->fetchAll();
             </div>
         </div>
     </div>
+
+    <script>
+        function toggleCard(overlayId) {
+            const overlay = document.getElementById(overlayId);
+            if (!overlay) return;
+            const isShowing = overlay.classList.toggle('show');
+            if (isShowing) {
+                document.body.style.overflow = 'hidden';
+                const firstField = overlay.querySelector('input, select');
+                if (firstField) firstField.focus();
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function closeOnOverlay(event, overlayId) {
+            // Only close if the click was on the overlay itself, not inside the card
+            if (event.target.id === overlayId) {
+                toggleCard(overlayId);
+            }
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal-overlay.show').forEach(function (overlay) {
+                    overlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                });
+            }
+        });
+    </script>
 </body>
 </html>
