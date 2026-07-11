@@ -76,6 +76,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             break;
 
+        case 'edit_category':
+            if ($match['status'] !== 'stopped') {
+                $stmt = $pdo->prepare("
+                    UPDATE categories
+                    SET name = ?, min_weight = ?, prize_quota = ?
+                    WHERE id = ? AND match_id = ?
+                ");
+
+                $stmt->execute([
+                    trim($_POST['name']),
+                    $_POST['min_weight'],
+                    $_POST['prize_quota'],
+                    $_POST['category_id'],
+                    $match_id
+                ]);
+            }
+            break;
+
+        case 'delete_category':
+            if ($match['status'] !== 'stopped') {
+                $stmt = $pdo->prepare("DELETE FROM categories WHERE id = ? AND match_id = ?");
+                $stmt->execute([$_POST['category_id'], $match_id]);
+            }
+            break;
+
         case 'add_team':
             if ($match['status'] !== 'stopped') {
                 $stmt = $pdo->prepare("
@@ -89,6 +114,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_POST['sequence_number'],
                     trim($_POST['team_name'])
                 ]);
+            }
+            break;
+
+        case 'edit_team':
+            if ($match['status'] !== 'stopped') {
+                $stmt = $pdo->prepare("
+                    UPDATE teams
+                    SET sequence_number = ?, team_name = ?
+                    WHERE id = ? AND match_id = ?
+                ");
+
+                $stmt->execute([
+                    $_POST['sequence_number'],
+                    trim($_POST['team_name']),
+                    $_POST['team_id'],
+                    $match_id
+                ]);
+            }
+            break;
+
+        case 'delete_team':
+            if ($match['status'] !== 'stopped') {
+                $stmt = $pdo->prepare("DELETE FROM teams WHERE id = ? AND match_id = ?");
+                $stmt->execute([$_POST['team_id'], $match_id]);
             }
             break;
 
@@ -106,6 +155,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_POST['team_id'],
                     $_POST['weight']
                 ]);
+            }
+            break;
+
+        case 'edit_catch':
+            if ($match['status'] !== 'stopped') {
+                $stmt = $pdo->prepare("
+                    UPDATE catch_logs
+                    SET category_id = ?, team_id = ?, weight = ?
+                    WHERE id = ? AND match_id = ?
+                ");
+
+                $stmt->execute([
+                    $_POST['category_id'],
+                    $_POST['team_id'],
+                    $_POST['weight'],
+                    $_POST['log_id'],
+                    $match_id
+                ]);
+            }
+            break;
+
+        case 'delete_catch':
+            if ($match['status'] !== 'stopped') {
+                $stmt = $pdo->prepare("DELETE FROM catch_logs WHERE id = ? AND match_id = ?");
+                $stmt->execute([$_POST['log_id'], $match_id]);
             }
             break;
     }
@@ -164,11 +238,7 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             <div class="btu-box">
                 <a href="home_page.php" style="text-decoration: none;"><button type="button">Home</button></a>
-                <form method="GET" action="race_page.php" style="display:inline;">
-                    <input type="hidden" name="match_id" value="<?= htmlspecialchars($match_id) ?>">
-                    <input type="hidden" name="tab" value="dashboard">
-                    <button type="submit" class="<?= $tab === 'dashboard' ? 'active-tab' : '' ?>">dashboard</button>
-                </form>
+                <a href="dashboard.php?match_id=<?= htmlspecialchars($match_id) ?>" style="text-decoration: none;"><button type="button">dashboard</button></a>
                 <?php if ($match['status'] === 'pending'): ?>
                 <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=<?= htmlspecialchars($tab) ?>" style="display:inline;">
                     <input type="hidden" name="action" value="start_race">
@@ -235,6 +305,9 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <th>Category</th>
                             <th>Min Wgt</th>
                             <th>Quota</th>
+                            <?php if ($match['status'] !== 'stopped'): ?>
+                            <th>Action</th>
+                            <?php endif; ?>
                         </tr>
                         <?php foreach ($categories as $cat): ?>
                         <tr>
@@ -242,6 +315,45 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td><?= htmlspecialchars($cat['name']) ?></td>
                             <td><?= htmlspecialchars($cat['min_weight']) ?></td>
                             <td><?= htmlspecialchars($cat['prize_quota']) ?></td>
+                            <?php if ($match['status'] !== 'stopped'): ?>
+                            <td>
+                                <div class="row-actions">
+                                    <button type="button" class="edit-btn" onclick="toggleCard('overlay-edit-category-<?= htmlspecialchars($cat['id']) ?>')">แก้ไข</button>
+                                    <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=categories" style="display:inline;" onsubmit="return confirm('ลบประเภท &quot;<?= htmlspecialchars(addslashes($cat['name'])) ?>&quot; ใช่หรือไม่? บันทึกการจับปลาในประเภทนี้จะถูกลบด้วย');">
+                                        <input type="hidden" name="action" value="delete_category">
+                                        <input type="hidden" name="category_id" value="<?= htmlspecialchars($cat['id']) ?>">
+                                        <button type="submit" class="delete-btn">ลบ</button>
+                                    </form>
+                                </div>
+                            </td>
+                            <div class="modal-overlay" id="overlay-edit-category-<?= htmlspecialchars($cat['id']) ?>" onclick="closeOnOverlay(event, 'overlay-edit-category-<?= htmlspecialchars($cat['id']) ?>')">
+                            <div class="form-card">
+                                <button type="button" class="modal-close" onclick="toggleCard('overlay-edit-category-<?= htmlspecialchars($cat['id']) ?>')">&times;</button>
+                                <h4>แก้ไขประเภทการแข่งขัน</h4>
+                                <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=categories">
+                                    <input type="hidden" name="action" value="edit_category">
+                                    <input type="hidden" name="category_id" value="<?= htmlspecialchars($cat['id']) ?>">
+                                    <div class="form-grid">
+                                        <div class="form-field">
+                                            <label>ชื่อประเภท</label>
+                                            <input type="text" name="name" value="<?= htmlspecialchars($cat['name']) ?>" required>
+                                        </div>
+                                        <div class="form-field">
+                                            <label>น้ำหนักขั้นต่ำ (กก.)</label>
+                                            <input type="number" step="0.01" name="min_weight" value="<?= htmlspecialchars($cat['min_weight']) ?>" required>
+                                        </div>
+                                        <div class="form-field">
+                                            <label>จำนวนรางวัล</label>
+                                            <input type="number" name="prize_quota" value="<?= htmlspecialchars($cat['prize_quota']) ?>" required>
+                                        </div>
+                                    </div>
+                                    <div class="btn-row">
+                                        <button type="submit">บันทึกการแก้ไข</button>
+                                    </div>
+                                </form>
+                            </div>
+                            </div>
+                            <?php endif; ?>
                         </tr>
                         <?php endforeach; ?>
                     </table>
@@ -278,11 +390,49 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <tr>
                             <th>No</th>
                             <th>Name</th>
+                            <?php if ($match['status'] !== 'stopped'): ?>
+                            <th>Action</th>
+                            <?php endif; ?>
                         </tr>
                         <?php foreach ($teams as $team): ?>
                         <tr>
                             <td><?= htmlspecialchars($team['sequence_number']) ?></td>
                             <td><?= htmlspecialchars($team['team_name']) ?></td>
+                            <?php if ($match['status'] !== 'stopped'): ?>
+                            <td>
+                                <div class="row-actions">
+                                    <button type="button" class="edit-btn" onclick="toggleCard('overlay-edit-team-<?= htmlspecialchars($team['id']) ?>')">แก้ไข</button>
+                                    <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=teams" style="display:inline;" onsubmit="return confirm('ลบทีม &quot;<?= htmlspecialchars(addslashes($team['team_name'])) ?>&quot; ใช่หรือไม่? บันทึกการจับปลาของทีมนี้จะถูกลบด้วย');">
+                                        <input type="hidden" name="action" value="delete_team">
+                                        <input type="hidden" name="team_id" value="<?= htmlspecialchars($team['id']) ?>">
+                                        <button type="submit" class="delete-btn">ลบ</button>
+                                    </form>
+                                </div>
+                            </td>
+                            <div class="modal-overlay" id="overlay-edit-team-<?= htmlspecialchars($team['id']) ?>" onclick="closeOnOverlay(event, 'overlay-edit-team-<?= htmlspecialchars($team['id']) ?>')">
+                            <div class="form-card">
+                                <button type="button" class="modal-close" onclick="toggleCard('overlay-edit-team-<?= htmlspecialchars($team['id']) ?>')">&times;</button>
+                                <h4>แก้ไขทีม / นักตกปลา</h4>
+                                <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=teams">
+                                    <input type="hidden" name="action" value="edit_team">
+                                    <input type="hidden" name="team_id" value="<?= htmlspecialchars($team['id']) ?>">
+                                    <div class="form-grid">
+                                        <div class="form-field">
+                                            <label>หมายเลข (No)</label>
+                                            <input type="number" name="sequence_number" value="<?= htmlspecialchars($team['sequence_number']) ?>" required>
+                                        </div>
+                                        <div class="form-field">
+                                            <label>ชื่อทีม/นักตกปลา</label>
+                                            <input type="text" name="team_name" value="<?= htmlspecialchars($team['team_name']) ?>" required>
+                                        </div>
+                                    </div>
+                                    <div class="btn-row">
+                                        <button type="submit">บันทึกการแก้ไข</button>
+                                    </div>
+                                </form>
+                            </div>
+                            </div>
+                            <?php endif; ?>
                         </tr>
                         <?php endforeach; ?>
                     </table>
@@ -342,6 +492,9 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <th>Category</th>
                             <th>Weight</th>
                             <th>Time</th>
+                            <?php if ($match['status'] !== 'stopped'): ?>
+                            <th>Action</th>
+                            <?php endif; ?>
                         </tr>
                         <?php foreach ($logs->fetchAll() as $log): ?>
                         <tr>
@@ -349,6 +502,53 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td><?= htmlspecialchars($log['cat_name']) ?></td>
                             <td><?= htmlspecialchars($log['weight']) ?></td>
                             <td><?= htmlspecialchars(date('H:i:s', strtotime($log['caught_at']))) ?></td>
+                            <?php if ($match['status'] !== 'stopped'): ?>
+                            <td>
+                                <div class="row-actions">
+                                    <button type="button" class="edit-btn" onclick="toggleCard('overlay-edit-log-<?= htmlspecialchars($log['id']) ?>')">แก้ไข</button>
+                                    <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=logs" style="display:inline;" onsubmit="return confirm('ลบบันทึกการจับปลาของทีม &quot;<?= htmlspecialchars(addslashes($log['team_name'])) ?>&quot; ใช่หรือไม่?');">
+                                        <input type="hidden" name="action" value="delete_catch">
+                                        <input type="hidden" name="log_id" value="<?= htmlspecialchars($log['id']) ?>">
+                                        <button type="submit" class="delete-btn">ลบ</button>
+                                    </form>
+                                </div>
+                            </td>
+                            <div class="modal-overlay" id="overlay-edit-log-<?= htmlspecialchars($log['id']) ?>" onclick="closeOnOverlay(event, 'overlay-edit-log-<?= htmlspecialchars($log['id']) ?>')">
+                            <div class="form-card">
+                                <button type="button" class="modal-close" onclick="toggleCard('overlay-edit-log-<?= htmlspecialchars($log['id']) ?>')">&times;</button>
+                                <h4>แก้ไขบันทึกการจับปลา</h4>
+                                <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=logs">
+                                    <input type="hidden" name="action" value="edit_catch">
+                                    <input type="hidden" name="log_id" value="<?= htmlspecialchars($log['id']) ?>">
+                                    <div class="form-grid">
+                                        <div class="form-field">
+                                            <label>ทีม</label>
+                                            <select name="team_id" required>
+                                                <?php foreach ($teams as $team): ?>
+                                                    <option value="<?= htmlspecialchars($team['id']) ?>" <?= $team['id'] == $log['team_id'] ? 'selected' : '' ?>><?= htmlspecialchars($team['sequence_number'] . ' - ' . $team['team_name']) ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div class="form-field">
+                                            <label>ประเภท</label>
+                                            <select name="category_id" required>
+                                                <?php foreach ($categories as $cat): ?>
+                                                    <option value="<?= htmlspecialchars($cat['id']) ?>" <?= $cat['id'] == $log['category_id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['name']) ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div class="form-field">
+                                            <label>น้ำหนัก (กก.)</label>
+                                            <input type="number" step="0.01" name="weight" value="<?= htmlspecialchars($log['weight']) ?>" required>
+                                        </div>
+                                    </div>
+                                    <div class="btn-row">
+                                        <button type="submit">บันทึกการแก้ไข</button>
+                                    </div>
+                                </form>
+                            </div>
+                            </div>
+                            <?php endif; ?>
                         </tr>
                         <?php endforeach; ?>
                     </table>
