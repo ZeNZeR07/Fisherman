@@ -1,8 +1,10 @@
 # Fisherman Project: Next Session Context & Progress Summary
 
-**Date:** June 23, 2026  
-**Status:** Backend Stop Match Logic Completed & Date Column Restored (UI Preserved)  
-**Current Branch:** `feature/back-end,strug`  
+**Date:** July 11, 2026  
+**Status:** Stop Match Logic Merged with Latest Homepage UI  
+**Current Branch:** `feature/back-end,strug` (1 commit ahead of `origin/feature/back-end,strug`, not yet pushed)  
+
+> **Note on history:** This session's stop-match work (commit `70945df`) was originally committed on top of an older homepage version. Meanwhile a teammate (`Teelemon`) pushed a homepage redesign (`UI-homepage`, commit `1386eb0`) straight to `origin/feature/back-end,strug` from the same base commit, so the two diverged. This session rebased the stop-match commit onto `1386eb0`, resolving conflicts in `home_page.php` (kept the new navbar/logout-modal UI, kept the DATE column fix) and removing the now-superseded `style/home_page.css` (replaced by `style/home_pageoo.css`). The result is committed as `e3c7711`.
 
 ---
 
@@ -19,11 +21,12 @@ Based on the system requirements in [Strugture.md](file:///workspaces/Fisherman/
     *   [db_connect.php](file:///workspaces/Fisherman/db_connect.php): Configures the PDO connection to MySQL with SQL injection protection.
     *   [database.sql](file:///workspaces/Fisherman/database.sql): Defines the schema for `matches`, `categories`, `teams`, `catch_logs`, and `admin_user`.
 *   **Management Dashboard**:
-    *   [home_page.php](file:///workspaces/Fisherman/home_page.php) (**Page 2: Admin Dashboard**): Lists all matches and handles new match creation via user prompts.
+    *   [home_page.php](file:///workspaces/Fisherman/home_page.php) (**Page 2: Admin Dashboard**): Top navbar + logout confirmation modal, lists all matches, and handles new match creation via a modal popup.
 *   **Scoring & Race Control**:
     *   [race_page.php](file:///workspaces/Fisherman/race_page.php) (**Page 3A: Live Scoring Control Room** / **Page 3B: Final Match Leaderboard**): A multi-tab dashboard that manages categories, team registrations, catch logs, and live standings.
+    *   [dashboard.php](file:///workspaces/Fisherman/dashboard.php): Still a **static placeholder** (empty table, hardcoded Thai headers) — not wired to the database. Unclear if this is meant to become Page 3B or is now superseded by the "dashboard" tab inside `race_page.php`.
 *   **Styling**:
-    *   [style/home_page.css](file:///workspaces/Fisherman/style/home_page.css), [style/race_page.css](file:///workspaces/Fisherman/style/race_page.css), [style/dashboard.css](file:///workspaces/Fisherman/style/dashboard.css).
+    *   [style/home_pageoo.css](file:///workspaces/Fisherman/style/home_pageoo.css) (renamed from `style/home_page.css` in `1386eb0`), [style/race_page.css](file:///workspaces/Fisherman/style/race_page.css), [style/dashboard.css](file:///workspaces/Fisherman/style/dashboard.css).
 
 ---
 
@@ -45,6 +48,7 @@ Based on the system requirements in [Strugture.md](file:///workspaces/Fisherman/
 
 *   **Match List Date Bug (Fixed)**: Discovered that the "DATE" column on the dashboard ([home_page.php](file:///workspaces/Fisherman/home_page.php)) was rendering as empty despite the table header including a comment requesting the match date (`d/m/y`). 
     *   *Fix*: Updated the loop to fetch and format the `created_at` timestamp using PHP's `date('d/m/Y', strtotime(...))`.
+*   **Broken script reference (Not Fixed, found during this session)**: `home_page.php` includes `<script src="js/script.js"></script>`, but no `js/` directory exists anywhere in the repo — this is a 404 in the browser console. It appears harmless right now because the logout-modal/create-match logic that would live there is actually duplicated inline in a `<script>` block later in the same file, but the dead reference should be removed or the file created.
 
 ---
 
@@ -63,11 +67,15 @@ Based on the system requirements in [Strugture.md](file:///workspaces/Fisherman/
 
 ### **B. Enhancements & Hardening (Medium Priority)**
 1.  **Password Security**:
-    *   The database and authentication code ([sign.php](file:///workspaces/Fisherman/sign.php)) currently store and check passwords in plaintext. We need to transition this to secure native PHP hashing via `password_hash()` and `password_verify()`.
-2.  **User Feedback & Notifications**:
+    *   The database and authentication code ([sign.php](file:///workspaces/Fisherman/sign.php)) currently store and check passwords in plaintext (`$password === $user['password']`, default `admin`/`admin`). We need to transition this to secure native PHP hashing via `password_hash()` and `password_verify()`.
+2.  **DB Credentials Hardcoded**:
+    *   [db_connect.php](file:///workspaces/Fisherman/db_connect.php) has the DB host/user/password committed directly in the file (`root` / hardcoded password). Should move to environment variables before this goes anywhere near production.
+3.  **User Feedback & Notifications**:
     *   Add flash notification messages (success/error popups or alerts) upon successfully registering a team, category, or logging a catch.
-3.  **Mobile Responsiveness**:
+4.  **Mobile Responsiveness**:
     *   Improve responsiveness for the scoring control forms on mobile screens.
+5.  **Broken `js/script.js` reference**:
+    *   See discovered-issues note above — either create the file or remove the dead `<script>` tag in `home_page.php`.
 
 ---
 
