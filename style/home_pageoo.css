@@ -256,7 +256,7 @@ td:nth-child(2){
     padding: 10px 20px;
     border: none;
     border-radius: 6px;
-    background: #ef4444;
+    background: #172d57;
     color: white;
     cursor: pointer;
 }
@@ -266,5 +266,6 @@ td:nth-child(2){
 }
 
 .logout-btn:hover{
-    background: #dc2626;
+    background: #c04848;
+    transition: 0.2s
 }

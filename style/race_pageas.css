@@ -1,0 +1,282 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body{
+    background: #f3f4f6;
+    padding: 20px;
+}
+
+.container{
+    max-width: 900px;
+    margin: auto;
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+/* ---------- Header ---------- */
+
+.col-1{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.text-box h1{
+    font-size: 28px;
+    color: #222;
+    margin-bottom: 5px;
+}
+
+.text-box h3{
+    font-size: 15px;
+    font-weight: normal;
+    color: #777;
+}
+
+.btu-box{
+    display: flex;
+    gap: 10px;
+}
+
+.btu-box button{
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btu-box button:first-child{
+    background: #e5e7eb;
+    color: #333;
+}
+
+.btu-box button:last-child{
+    background: #0f8aa7;
+    color: white;
+}
+
+/* ---------- Menu ---------- */
+
+.menu{
+    display: flex;
+    gap: 10px;
+    background: #eef0f2;
+    padding: 10px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.menu button{
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    color: #555;
+}
+
+.menu button:hover{
+    background: white;
+}
+
+.menu button:first-child{
+    background: white;
+    font-weight: bold;
+}
+
+/* ---------- Table ---------- */
+
+.show-detail{
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+table{
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td{
+    border: 1px solid #d1d5db;
+    padding: 10px;
+}
+
+th{
+    background: #f3f4f6;
+    text-align: center;
+}
+
+td{
+    background: white;
+}
+
+td:first-child{
+    width: 80px;
+    text-align: center;
+}
+
+        .form-card {
+            margin-bottom: 24px;
+            padding: 20px 24px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
+            max-width: 520px;
+        }
+        .form-card h4 {
+            margin: 0 0 16px 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-card h4::before {
+            content: "";
+            width: 6px;
+            height: 18px;
+            background: #3b82f6;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px 16px;
+        }
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .form-field label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4b5563;
+        }
+        .form-field input,
+        .form-field select {
+            padding: 9px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            background: #f9fafb;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .form-field input:focus,
+        .form-field select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+            background: #fff;
+        }
+        .form-card .btn-row {
+            margin-top: 18px;
+        }
+        .form-card button[type="submit"] {
+            padding: 9px 22px;
+            background: #3b82f6;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .form-card button[type="submit"]:hover {
+            background: #2563eb;
+        }
+
+        /* ---------- Toggle "add" button + modal popup card ---------- */
+        .add-toggle-btn{
+            margin: 10px 10px 10px auto;
+
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background: #10b981;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        .add-toggle-btn:hover {
+            background: #059669;
+            
+        }
+
+        .plus-icon{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            line-height: 1;
+            
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(17, 24, 39, 0.6);
+            backdrop-filter: blur(2px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-overlay.show {
+            display: flex;
+            animation: fadeIn 0.15s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .form-card {
+            position: relative;
+            width: 90%;
+            max-width: 480px;
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: popIn 0.2s ease;
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .form-card .modal-close {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            line-height: 1;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+        }
+        .form-card .modal-close:hover {
+            color: #374151;
+        }
+
+        .nav-link { text-decoration: none; color: inherit; display: inline-block; padding: 5px 10px; }
+        .active-tab { font-weight: bold; background-color: #ddd; }
