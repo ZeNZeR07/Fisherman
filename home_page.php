@@ -12,6 +12,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'edit_match') {
+    $edit_id = $_POST['match_id'] ?? 0;
+    $match_name = trim($_POST['match_name'] ?? '');
+    if ($edit_id && $match_name !== '') {
+        $stmt = $pdo->prepare("UPDATE matches SET name = ? WHERE id = ?");
+        $stmt->execute([$match_name, $edit_id]);
+    }
+    header("Location: home_page.php");
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_match') {
     $delete_id = $_POST['match_id'] ?? 0;
     if ($delete_id) {
@@ -114,11 +125,14 @@ $status_labels = [
                                 <?= htmlspecialchars($status_labels[$match['status']] ?? ucfirst($match['status'])) ?>
                             </td>
                             <td style="text-align: center; padding: 12px 15px;">
-                                <form method="POST" style="display:inline;" onsubmit="return confirm('ลบการแข่งขัน &quot;<?= htmlspecialchars(addslashes($match['name'])) ?>&quot; ใช่หรือไม่? ข้อมูลทีม/ชนิดปลา/บันทึกน้ำหนักทั้งหมดจะถูกลบด้วย');">
-                                    <input type="hidden" name="action" value="delete_match">
-                                    <input type="hidden" name="match_id" value="<?= htmlspecialchars($match['id']) ?>">
-                                    <button type="submit" class="confirm-btn">ลบ</button>
-                                </form>
+                                <div class="row-actions">
+                                    <button type="button" class="edit-btn" data-id="<?= htmlspecialchars($match['id']) ?>" data-name="<?= htmlspecialchars($match['name'], ENT_QUOTES) ?>" onclick="openEditMatchModal(this)">แก้ไข</button>
+                                    <form method="POST" style="display:inline;" onsubmit="return confirm('ลบการแข่งขัน &quot;<?= htmlspecialchars(addslashes($match['name'])) ?>&quot; ใช่หรือไม่? ข้อมูลทีม/ชนิดปลา/บันทึกน้ำหนักทั้งหมดจะถูกลบด้วย');">
+                                        <input type="hidden" name="action" value="delete_match">
+                                        <input type="hidden" name="match_id" value="<?= htmlspecialchars($match['id']) ?>">
+                                        <button type="submit" class="confirm-btn">ลบ</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -146,7 +160,28 @@ $status_labels = [
             </div>
         </div>
     </div>
-    
+
+    <!-- edit match modal -->
+    <div class="modal" id="editMatchModal">
+        <div class="modal-card">
+            <h2>แก้ไขการแข่ง</h2>
+
+            <p>ชื่อการแข่ง</p>
+            <input type="text" id="editMatchName" placeholder="กรอกชื่อการแข่ง">
+
+            <div class="btn-group">
+                <button class="cancel-btn" onclick="closeEditMatchModal()">ยกเลิก</button>
+                <button class="create-btn" onclick="saveEditMatch()">บันทึก</button>
+            </div>
+        </div>
+    </div>
+
+    <form id="editMatchForm" method="POST" style="display:none;">
+        <input type="hidden" name="action" value="edit_match">
+        <input type="hidden" name="match_id" id="editMatchIdInput">
+        <input type="hidden" name="match_name" id="editMatchNameInput">
+    </form>
+
     <script>
     function openModal() {
         document.getElementById("matchModal").style.display = "flex";
@@ -167,6 +202,31 @@ $status_labels = [
 
         document.getElementById("matchNameInput").value = name;
         document.getElementById("createMatchForm").submit();
+    }
+
+    let editMatchId = null;
+
+    function openEditMatchModal(btn) {
+        editMatchId = btn.dataset.id;
+        document.getElementById("editMatchName").value = btn.dataset.name;
+        document.getElementById("editMatchModal").style.display = "flex";
+    }
+
+    function closeEditMatchModal() {
+        document.getElementById("editMatchModal").style.display = "none";
+    }
+
+    function saveEditMatch() {
+        let name = document.getElementById("editMatchName").value.trim();
+
+        if (name === "") {
+            alert("Please enter match name");
+            return;
+        }
+
+        document.getElementById("editMatchIdInput").value = editMatchId;
+        document.getElementById("editMatchNameInput").value = name;
+        document.getElementById("editMatchForm").submit();
     }
 
     const logoutBtn = document.getElementById("logoutBtn");

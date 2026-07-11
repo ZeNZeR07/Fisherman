@@ -280,3 +280,32 @@ td:first-child{
 
         .nav-link { text-decoration: none; color: inherit; display: inline-block; padding: 5px 10px; }
         .active-tab { font-weight: bold; background-color: #ddd; }
+
+        /* ---------- Row action buttons (edit/delete) ---------- */
+        .row-actions {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+        }
+        .row-actions button {
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #fff;
+            transition: background 0.15s;
+        }
+        .row-actions .edit-btn {
+            background: #3b82f6;
+        }
+        .row-actions .edit-btn:hover {
+            background: #2563eb;
+        }
+        .row-actions .delete-btn {
+            background: #ef4444;
+        }
+        .row-actions .delete-btn:hover {
+            background: #dc2626;
+        }
