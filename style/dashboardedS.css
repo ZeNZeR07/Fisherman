@@ -10,7 +10,7 @@
 body{
     min-height: 100vh;
     background: linear-gradient(135deg, #f4f6f9, #dfe9f3);
-    font-size: 18px;
+    font-size: 22px;
     line-height: 1.65;
 }
 
@@ -129,7 +129,7 @@ th{
     background: #7aaae9;
     color: white;
     padding: 17px;
-    font-size: 18px;
+    font-size: 22px;
     font-weight: 700;
 }
 
@@ -138,9 +138,9 @@ td{
     padding: 16px;
     text-align: center;
     border-bottom: 1px solid #e5e7eb;
-    color: #374151;
-    font-size: 18px;
-    font-weight: 500;
+    color: #111827;
+    font-size: 22px;
+    font-weight: 700;
 }
 
 /* อันดับ/น้ำหนัก/เวลา เป็นข้อมูลรูปแบบสั้นตายตัว ให้ย่อตามเนื้อหา

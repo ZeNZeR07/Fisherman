@@ -72,6 +72,9 @@ foreach ($categories as $cat) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style/dashboardedS.css">
 </head>
 <body>
@@ -96,7 +99,7 @@ foreach ($categories as $cat) {
 
             <?php if (count($categories) > 0): ?>
                 <?php foreach ($categories as $cat): ?>
-                <h3 style="margin: 20px 0 20px;"><?= htmlspecialchars($cat['name']) ?> (Top <?= htmlspecialchars($cat['prize_quota']) ?>)</h3>
+                <h3 style="margin: 20px 0 20px;"><?= htmlspecialchars($cat['name']) ?> -  <?= htmlspecialchars($cat['min_weight']) ?> กก.</h3>
                 <div class="table-scroll">
                 <table>
                     <tr>
