@@ -225,62 +225,24 @@ tr:nth-child(even){
         margin-bottom: 24px;
     }
 
-    /* Stacked "card" table: each row becomes a labelled card instead of
-       scrolling sideways, so nothing is ever hidden off-screen on narrow phones. */
+    /* Keep the normal table layout (not a stacked card list) on mobile for this
+       page — it stays a straightforward, glanceable ranking table and scrolls
+       horizontally via .table-scroll if a row ever needs more room than the screen. */
+    th,
+    td{
+        padding: 9px 8px;
+        font-size: 14px;
+    }
+
     th:nth-child(1), td:nth-child(1),
     th:nth-child(3), td:nth-child(3),
     th:nth-child(4), td:nth-child(4){
-        width: auto;
-        white-space: normal;
+        width: 1%;
+        white-space: nowrap;
     }
 
     th:nth-child(2), td:nth-child(2){
-        text-align: right;
-    }
-
-    tr:first-child{
-        display: none;
-    }
-
-    tr{
-        display: block;
-        margin-bottom: 10px;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        overflow: hidden;
-    }
-
-    tr:last-child{
-        margin-bottom: 0;
-    }
-
-    td{
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-        text-align: right;
-    }
-
-    td:last-child{
-        border-bottom: none;
-    }
-
-    td::before{
-        content: attr(data-label);
-        font-weight: 700;
-        color: #6b7280;
-        font-size: 14px;
-        letter-spacing: 0.3px;
-    }
-
-    td[colspan]{
-        display: block;
-        text-align: center;
-    }
-
-    td[colspan]::before{
-        content: none;
+        text-align: left;
     }
 }
 

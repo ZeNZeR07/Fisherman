@@ -42,7 +42,8 @@
 - **ปรับสมดุล UI `home_page.php`**: ย้ายปุ่ม "+" จากลอยมุมซ้ายเดี่ยวๆ (มีพื้นที่ว่างขวามหาศาล) ไปมุมขวาบนเหนือคอลัมน์ ACTION ให้ตรงกับรูปแบบปุ่มเพิ่มใน `race_page.php`, ลด `.border{min-height}` จาก 600px เหลือ 200px (การ์ดตารางไม่เหลือพื้นที่ว่างเยอะเกินเมื่อมีแมตช์น้อย), เปลี่ยน `margin-top` ของหัวข้อจาก % เป็นค่าคงที่ให้สม่ำเสมอทุกขนาดจอ
 - ไฟล์ stylesheet จริงตอนนี้ชื่อ `style/home_pagena.css`, `style/race_pageasak.css`, `style/dashboardedS.css` (คนละชื่อกับที่เคยบันทึกไว้ก่อนหน้า เช่น `home_pageoo.css`/`race_pageas.css`/`dashboard.css` — อาจถูกเพื่อนร่วมทีม rename ไปแล้ว)
 - **เพิ่มขนาด/น้ำหนัก font อีกรอบ** (ต่อจากบรรทัดข้างบน ผู้ใช้ขอเพิ่มอีกในวันเดียวกัน): บั๊มปี base `body{font-size}` จาก 16px → **18px** ทุกหน้า (`line-height` 1.6 → 1.65), เพิ่ม `font-weight:500` ให้ตัวเลข/ข้อความในทุก `<td>` ให้อ่านง่ายขึ้นโดยไม่ต้อง bold เต็ม, บั๊มขนาดหัวข้อ/ปุ่ม/label เกือบทุกจุดอีก ~1-3px, และ **เปลี่ยน font stack** จาก `Arial, Helvetica, sans-serif` (รองรับ glyph ภาษาไทยได้ไม่ดีบนหลาย OS) เป็น `"Noto Sans Thai", "Leelawadee UI", "Segoe UI", Tahoma, Arial, sans-serif` ให้ตรงกันทั้ง 3 stylesheet — ทดสอบ Playwright ซ้ำทุกขนาดจอ (280px-3840px) ยืนยันไม่มี overflow/wrap ผิดปกติเพิ่มจากขนาด font ที่ใหญ่ขึ้น (หมายเหตุ: sandbox ที่ทดสอบไม่มีฟอนต์ไทยติดตั้งจริง จึงตรวจสอบได้แค่ layout ไม่ใช่ความสวยงามของตัวอักษรไทย — อุปกรณ์จริงของผู้ใช้ทั่วไป (Windows/Android/iOS) มีฟอนต์เหล่านี้หรือใกล้เคียงติดตั้งมาให้แล้ว)
-- ⚠️ **ยังไม่ได้ commit** — การแก้ไขทั้งหมดข้างบนอยู่ใน working tree ของ branch `feature/back-end,strug` เท่านั้น (`git status` ตอนจบ session: `dashboard.php`, `home_page.php`, `race_page.php`, `style/dashboardedS.css`, `style/home_pagena.css`, `style/race_pageasak.css` ทั้งหมด modified แต่ยัง unstaged)
+- ✅ Commit `2bf1d59` "feat: responsive UI, table column sizing, and readability improvements" push ขึ้น `origin/feature/back-end,strug` เรียบร้อยแล้ว
+- **แก้ `dashboard.php` กลับเป็นตารางแนวนอนแบบเดิมบนมือถือ** (หลัง commit ด้านบน) — ผู้ใช้แจ้งว่าการ์ดแนวตั้ง (label:value) ที่ใช้ทั่วเว็บอ่านยากเกินไปสำหรับหน้านี้โดยเฉพาะ เพราะมีหลายตาราง (ต่อประเภทปลา) เรียงยาว ต้องเลื่อนเยอะเวลาเทียบอันดับ จึงเอา card-layout ออกเฉพาะ `style/dashboardedS.css` (หน้าอื่นยังเป็นการ์ดเหมือนเดิม เพราะมีปุ่ม Action ที่ต้องกันไม่ให้หลุดจอ) พร้อมลบ `data-label` attribute ที่ไม่ได้ใช้แล้วออกจาก `dashboard.php` — ⚠️ **ยังไม่ได้ commit** ส่วนนี้ (`git status`: `dashboard.php`, `style/dashboardedS.css` modified)
 
 ## อัปเดตก่อนหน้า (11 ก.ค. 2026)
 - **Merge งานของเพื่อนร่วมทีม (Teelemon)** ที่ push เข้า branch `feature/back-end,strug` เดียวกัน (commit UI-race_page) — แก้ conflict ใน `race_page.php` โดยรวม UI แบบ modal ของเพื่อนเข้ากับ logic stop_race/re-start ที่มีอยู่เดิม
@@ -56,8 +57,34 @@
 1. หน้า Podium สรุปผลอันดับ 1-3 แบบไฮไลต์ (เหรียญทอง/เงิน/ทองแดง) ตาม `Strugture.md` — ตอนนี้ `dashboard.php` แสดงเป็นตารางธรรมดา ยังไม่ใช่ podium
 2. ฟีเจอร์ Export/Print ผลการแข่งขันเป็น PDF
 3. ข้อความแจ้งเตือน success/error เมื่อ submit ฟอร์ม
-4. ยกระดับความปลอดภัย: รหัสผ่านใน `admin_user` ยังเก็บเป็น plain text ต้องเปลี่ยนไปใช้ `password_hash()`/`password_verify()`, และ DB credentials ใน `db_connect.php` ยัง hardcode อยู่
-5. **Commit + push** งาน responsive/font/table-proportion ของ 12 ก.ค. 2026 (ดูหัวข้อ ⚠️ ด้านบน — ยังอยู่ใน working tree เท่านั้น)
+4. ยกระดับความปลอดภัย: รหัสผ่านใน `admin_user` ยังเก็บเป็น plain text ต้องเปลี่ยนไปใช้ `password_hash()`/`password_verify()`, และ DB credentials ใน `db_connect.php` ยัง hardcode อยู่ (ดูหัวข้อบั๊กด้านล่างข้อ 7-8 ด้วย เป็นเรื่องเดียวกัน)
+5. **Commit + push** การแก้ `dashboard.php` กลับเป็นตารางบนมือถือ (ดูหัวข้อ ⚠️ ด้านบน — ยังอยู่ใน working tree เท่านั้น)
+6. **แก้บั๊กที่ตรวจพบ 12 ก.ค. 2026** — ดูหัวข้อ "🐛 บั๊กที่พบแต่ยังไม่ได้แก้" ด้านล่าง (ผู้ใช้ขอให้บันทึกไว้ก่อน ยังไม่ให้แก้)
+
+## 🐛 บั๊กที่พบแต่ยังไม่ได้แก้ (ตรวจสอบ 12 ก.ค. 2026 — บันทึกไว้ก่อน รอผู้ใช้สั่งแก้)
+
+**ร้ายแรง (ทำให้แอปพัง/error ได้):**
+1. ไม่มี input validation ตัวเลขเลยทั้ง client (`min="0"` ไม่มีในทุกช่อง number ของ `race_page.php`) และ server — ถ้า `prize_quota` เป็นค่าติดลบแล้วถูกใช้เป็น SQL `LIMIT` จะทำให้ `PDOException` หลุดออกมาเป็น fatal error/white screen
+2. ทุก POST action ใน `race_page.php` (add/edit/delete category, team, catch) ไม่มี `try/catch` ห่อเลย — input ผิดปกติใดๆ ที่หลุดผ่านมาได้ (เช่นข้อ 1) จะทำให้หน้าเว็บ error ทันทีแทนที่จะแจ้งเตือนสวยๆ
+
+**Logic ผิด กระทบความถูกต้องของผลแข่งขัน (สำคัญสุดในมุม business):**
+3. **Tie-break เวลาจับปลาผิด** — query จัดอันดับ (ซ้ำกัน 2 จุด: `dashboard.php` และ `race_page.php` tab dashboard) ใช้ `MAX(cl.weight)` คู่กับ `MIN(cl.caught_at)` ในการ `GROUP BY` เดียวกัน แต่สองค่านี้อาจมาจากคนละแถว (คนละปลา) กัน — เวลาที่ใช้ตัดสิน tie-break อาจไม่ใช่เวลาที่จับปลาตัวที่ทำน้ำหนักสูงสุดจริงๆ ทำให้อันดับตอนคะแนนเท่ากันผิดได้
+4. **`dashboard.php` (หน้าสรุปผลจริง) hardcode Top 5 ตายตัว** (`bindValue(4, 5, ...)` + ข้อความ "(Top 5)" ในโค้ดตรงๆ) ไม่ใช้ `prize_quota` ที่แอดมินตั้งไว้จริงเหมือนที่ `race_page.php` tab dashboard ทำ — ถ้าตั้ง quota เป็น 3 หน้าสรุปผลจะยังโชว์ 5 อันดับอยู่ดี
+5. **Race condition ตอนเพิ่มทีม** — `add_team` หาเลขทีมถัดไปด้วย `SELECT MAX` แล้วค่อย `INSERT` แยก query ไม่มี lock/transaction คั่น ถ้ามีคนกดเพิ่มทีมพร้อมกัน 2 คนมีโอกาสได้เลขทีมซ้ำ และตาราง `teams` ก็ไม่มี UNIQUE constraint (`match_id`, `sequence_number`) กันไว้
+6. **`edit_team` ไม่มีเพดาน 00-99** ต่างจาก `add_team` ที่เช็ค `if ($nextNo > 99) die(...)` — แก้ไขทีมให้เป็นเลข 9999 ผ่านฟอร์มได้ตรงๆ
+
+**ความปลอดภัย (เพิ่มเติมจาก plaintext password ที่รู้อยู่แล้ว):**
+7. ไม่มี CSRF token เลยสักฟอร์ม (สร้าง/แก้/ลบแมตช์, เริ่ม/หยุดแข่ง, เพิ่มทีม/ปลา/บันทึกน้ำหนัก)
+8. `sign.php` ไม่เรียก `session_regenerate_id()` หลัง login สำเร็จ — เสี่ยง session fixation
+
+**โค้ดตาย/โครงสร้างไม่ถูกต้อง (ไม่กระทบการใช้งานตอนนี้):**
+9. `home_page.php` โหลด `<script src="js/script.js">` ที่ไม่มีไฟล์จริง — ยิง 404 ทุกครั้งที่เปิดหน้า (เคยมีคนบันทึกไว้ใน `next_session_context.md` แล้วแต่ยังไม่แก้)
+10. `style/home_pagena.css` มี selector ซ้ำกัน 4 ตัว (`.modal`, `.modal-card`, `.btn-group`, `.cancel-btn` ประกาศคนละ 2 รอบ) — ตอนนี้ค่าตรงกันโดยบังเอิญเลยไม่มีผลที่เห็น แต่เสี่ยงบั๊กเงียบถ้าแก้ค่าใดค่าหนึ่งทีหลัง
+11. `<div class="modal-overlay">` ของฟอร์มแก้ไข ถูกวางเป็นลูกของ `<tr>` ตรงๆ ใน 3 ตาราง (categories/teams/logs) ของ `race_page.php` — ผิด HTML spec (เบราว์เซอร์ foster-parent ย้ายออกไปให้อัตโนมัติ ใช้งานได้เพราะ overlay เป็น `position:fixed` แต่เปราะบางถ้าเปลี่ยน CSS ในอนาคต)
+
+**UX เล็กๆ (ไม่ใช่บั๊กจริง):**
+- ตาราง categories/teams/logs ใน `race_page.php` ไม่มีข้อความ "ไม่มีข้อมูล" เวลาว่างเปล่า ต่างจาก `home_page.php` ที่มี
+- ไม่มี unique check ชื่อประเภทปลาซ้ำในแมตช์เดียวกัน — สร้างซ้ำได้ ทำให้ leaderboard โชว์หัวข้อซ้ำ
 
 ## ข้อสังเกตด้านความปลอดภัย (ควรแก้ก่อนใช้งานจริง)
 - **รหัสผ่าน plain-text**: `sign.php` เทียบรหัสผ่านด้วย `===` ตรงๆ กับค่าที่เก็บใน DB (`admin/admin`) — ควรใช้ password hashing
