@@ -101,10 +101,10 @@ foreach ($categories as $cat) {
                         <?php if (count($rankingsByCategory[$cat['id']]) > 0): ?>
                             <?php $rank = 1; foreach ($rankingsByCategory[$cat['id']] as $row): ?>
                             <tr>
-                                <td data-label="อันดับ"><?= $rank++ ?></td>
-                                <td data-label="ทีม"><?= htmlspecialchars($row['team_name']) ?></td>
-                                <td data-label="น้ำหนัก"><?= htmlspecialchars($row['max_weight']) ?></td>
-                                <td data-label="เวลา"><?= htmlspecialchars(date('H:i:s', strtotime($row['first_caught']))) ?></td>
+                                <td><?= $rank++ ?></td>
+                                <td><?= htmlspecialchars($row['team_name']) ?></td>
+                                <td><?= htmlspecialchars($row['max_weight']) ?></td>
+                                <td><?= htmlspecialchars(date('H:i:s', strtotime($row['first_caught']))) ?></td>
                             </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
