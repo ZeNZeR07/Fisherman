@@ -48,7 +48,7 @@ $status_labels = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home Page</title>
-    <link rel="stylesheet" href="style/home_pageoo.css">
+    <link rel="stylesheet" href="style/home_pagena.css">
 </head>
 
 <body>
@@ -59,7 +59,6 @@ $status_labels = [
 
         <ul class="nav-menu">
             <li><a href="home_page.php">Home</a></li>
-            <li><a href="race_page.php">Race</a></li>
         </ul>
 
         <div class="nav-right">
@@ -105,26 +104,26 @@ $status_labels = [
             <div class="border">
                 <table style="width: 100%; table-layout: fixed; border-collapse: collapse;">
                     <tr>
-                        <th style="text-align: center; padding: 12px 15px;">RACE NAME</th>
-                        <th style="text-align: center; padding: 12px 15px;">DATE</th>
-                        <th style="text-align: center; padding: 12px 15px;">STATUS</th>
-                        <th style="text-align: center; padding: 12px 15px;">ACTION</th>
+                        <th style="text-align: center;">RACE NAME</th>
+                        <th style="text-align: center;">DATE</th>
+                        <th style="text-align: center;">STATUS</th>
+                        <th style="text-align: center;">ACTION</th>
                     </tr>
                     <?php if (count($matches) > 0): ?>
                         <?php foreach ($matches as $match): ?>
                         <tr>
-                            <td style="text-align: center; padding: 12px 15px;">
+                            <td style="padding-left:11%;">
                                 <a href="race_page.php?match_id=<?= htmlspecialchars($match['id']) ?>" style="text-decoration: none; color: inherit;">
                                     <?= htmlspecialchars($match['name']) ?>
                                 </a>
                             </td>
-                            <td style="text-align: center; padding: 12px 15px;">
+                            <td style="text-align: center; ">
                                 <?= htmlspecialchars(date('d/m/Y', strtotime($match['created_at']))) ?>
                             </td>
-                            <td style="text-align: center; padding: 12px 15px;">
+                            <td style="padding-left:80px;">
                                 <?= htmlspecialchars($status_labels[$match['status']] ?? ucfirst($match['status'])) ?>
                             </td>
-                            <td style="text-align: center; padding: 12px 15px;">
+                            <td style="text-align: center; ">
                                 <div class="row-actions">
                                     <button type="button" class="edit-btn" data-id="<?= htmlspecialchars($match['id']) ?>" data-name="<?= htmlspecialchars($match['name'], ENT_QUOTES) ?>" onclick="openEditMatchModal(this)">แก้ไข</button>
                                     <form method="POST" style="display:inline;" onsubmit="return confirm('ลบการแข่งขัน &quot;<?= htmlspecialchars(addslashes($match['name'])) ?>&quot; ใช่หรือไม่? ข้อมูลทีม/ชนิดปลา/บันทึกน้ำหนักทั้งหมดจะถูกลบด้วย');">

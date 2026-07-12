@@ -10,23 +10,54 @@
 body{
     min-height: 100vh;
     background: linear-gradient(135deg, #f4f6f9, #dfe9f3);
+}
+
+.navbar{
+    width: 100%;
+    height: 50px;
+    background: #2e82d1;
     display: flex;
-    justify-content: center;
     align-items: center;
-    padding: 20px;
+    padding: 0 40px;
+    box-sizing: border-box;
+}
+.logo h2{
+    color: white;
+}
+
+.nav-menu{
+    display: flex;
+    list-style: none;
+    margin-left: 5%;
+    gap: 30px;
+}
+
+.nav-menu a{
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    transition: .3s;
+}
+
+.nav-menu a:hover{
+    color: #dbeafe;
+}
+
+.nav-right{
+    margin-left: auto;
 }
 
 /* Container */
 .container{
     width: 100%;
     max-width: 1000px;
-    margin: 20px auto;
+    margin: 50px auto;
 }
 
 /* Card */
 .card{
     background: #ffffff;
-    border-radius: 20px;
+    border-radius: 50px;
     padding: 30px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
@@ -35,7 +66,7 @@ body{
 .card h2{
     text-align: center;
     color: #1e293b;
-    margin-bottom: 0;
+    margin-bottom: 40px;
     font-size: 2rem;
 }
 
@@ -62,14 +93,14 @@ body{
     padding: 10px 20px;
     cursor: pointer;
     font-weight: bold;
-    background: #2563eb;
+    background: #9dd6e6;
     color: #ffffff;
     white-space: nowrap;
     transition: background 0.15s;
 }
 
 .back-btn:hover{
-    background: #1d4ed8;
+    background: #69a0af;
 }
 
 /* Table */
@@ -78,11 +109,13 @@ table{
     border-collapse: collapse;
     overflow: hidden;
     border-radius: 12px;
+    margin-bottom: 80px;
+    box-shadow: 2px 5px 10px rgba(0,0,0,0.08);
 }
 
 /* Header */
 th{
-    background: #2563eb;
+    background: #7aaae9;
     color: white;
     padding: 15px;
     font-size: 16px;

@@ -103,6 +103,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         case 'add_team':
             if ($match['status'] !== 'stopped') {
+
+                // หาเลขทีมล่าสุดของการแข่งขันนี้
+                $stmt = $pdo->prepare("
+                    SELECT MAX(sequence_number)
+                    FROM teams
+                    WHERE match_id = ?
+                ");
+                $stmt->execute([$match_id]);
+
+                $lastNo = $stmt->fetchColumn();
+
+                // ถ้ายังไม่มีทีม ให้เริ่มที่ 0
+                $nextNo = ($lastNo === null) ? 0 : $lastNo + 1;
+
+                // จำกัดหมายเลขไม่เกิน 99
+                if ($nextNo > 99) {
+                    die("ไม่สามารถเพิ่มทีมได้ เนื่องจากหมายเลขครบ 00 - 99 แล้ว");
+                }
+
+                // เพิ่มทีม
                 $stmt = $pdo->prepare("
                     INSERT INTO teams
                     (match_id, sequence_number, team_name)
@@ -111,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $stmt->execute([
                     $match_id,
-                    $_POST['sequence_number'],
+                    $nextNo,
                     trim($_POST['team_name'])
                 ]);
             }
@@ -191,7 +211,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 /* ==========================
    Tab
 ========================== */
-$tab = $_GET['tab'] ?? 'dashboard';
+$tab = $_GET['tab'] ?? 'categories';
+
+/* ==========================
+   สิทธิ์แก้ไขข้อมูล
+   อนุญาตให้ เพิ่ม/แก้ไข/ลบ ได้ทั้งตอน "pending" และ "live"
+   จะถูกล็อกก็ต่อเมื่อการแข่งขัน "stopped" เท่านั้น
+========================== */
+$canEdit = $match['status'] !== 'stopped';
 
 /* ==========================
    Categories
@@ -222,40 +249,55 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Race Page</title>
-    <link rel="stylesheet" href="style/race_pageas.css">
+    <link rel="stylesheet" href="style/race_pageasak.css">
     <style>
         /* ---------- Card-style input form ---------- */
-
+        .match-controls {
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <h2>FISHER MAN</h2>
+        </div>
+
+        <ul class="nav-menu">
+            <li><a href="home_page.php">Home</a></li>
+        </ul>
+    </nav>
+
     <div class="container">
         <div class="col-1">
             <div class="text-box">
                 <h1><?= htmlspecialchars($match['name']) ?></h1>
                 <h3>Status: <?= htmlspecialchars(ucfirst($match['status'])) ?></h3>
+
+                <div class="match-controls">
+                    <?php if ($match['status'] === 'pending'): ?>
+                    <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=<?= htmlspecialchars($tab) ?>" style="display:inline;">
+                        <input type="hidden" name="action" value="start_race">
+                        <button type="submit" class="btn-start">start race</button>
+                    </form>
+                    <?php elseif ($match['status'] === 'live'): ?>
+                    <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=<?= htmlspecialchars($tab) ?>" style="display:inline;">
+                        <input type="hidden" name="action" value="stop_race">
+                        <button type="submit" class="btn-stop">stop match</button>
+                    </form>
+                    <?php else: ?>
+                    <button type="button" class="btn-stopped" disabled>stopped</button>
+                    <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=<?= htmlspecialchars($tab) ?>" style="display:inline;">
+                        <input type="hidden" name="action" value="start_race">
+                        <button type="submit" class="btn-restart">re-start match</button>
+                    </form>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <div class="btu-box">
-                <a href="home_page.php" style="text-decoration: none;"><button type="button">Home</button></a>
-                <a href="dashboard.php?match_id=<?= htmlspecialchars($match_id) ?>" style="text-decoration: none;"><button type="button">dashboard</button></a>
-                <?php if ($match['status'] === 'pending'): ?>
-                <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=<?= htmlspecialchars($tab) ?>" style="display:inline;">
-                    <input type="hidden" name="action" value="start_race">
-                    <button type="submit">start race</button>
-                </form>
-                <?php elseif ($match['status'] === 'live'): ?>
-                <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=<?= htmlspecialchars($tab) ?>" style="display:inline;">
-                    <input type="hidden" name="action" value="stop_race">
-                    <button type="submit">stop match</button>
-                </form>
-                <?php else: ?>
-                <button type="button" disabled>stopped</button>
-                <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=<?= htmlspecialchars($tab) ?>" style="display:inline;">
-                    <input type="hidden" name="action" value="start_race">
-                    <button type="submit">re-start match</button>
-                </form>
-                <?php endif; ?>
+                <a href="dashboard.php?match_id=<?= htmlspecialchars($match_id) ?>" style="text-decoration: none;"><button type="button">▭ dashboard</button></a>
             </div>
         </div>
 
@@ -268,7 +310,7 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             <div class="show-detail">
                 <?php if ($tab === 'categories'): ?>
-                    <?php if ($match['status'] !== 'stopped'): ?>
+                    <?php if ($canEdit): ?>
                     <button type="button" class="add-toggle-btn" onclick="toggleCard('overlay-add-category')">
                         <span class="plus-icon">+</span>
                     </button>
@@ -305,7 +347,7 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <th>Category</th>
                             <th>Min Wgt</th>
                             <th>Quota</th>
-                            <?php if ($match['status'] !== 'stopped'): ?>
+                            <?php if ($canEdit): ?>
                             <th>Action</th>
                             <?php endif; ?>
                         </tr>
@@ -315,7 +357,7 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td><?= htmlspecialchars($cat['name']) ?></td>
                             <td><?= htmlspecialchars($cat['min_weight']) ?></td>
                             <td><?= htmlspecialchars($cat['prize_quota']) ?></td>
-                            <?php if ($match['status'] !== 'stopped'): ?>
+                            <?php if ($canEdit): ?>
                             <td>
                                 <div class="row-actions">
                                     <button type="button" class="edit-btn" onclick="toggleCard('overlay-edit-category-<?= htmlspecialchars($cat['id']) ?>')">แก้ไข</button>
@@ -359,7 +401,7 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </table>
 
                 <?php elseif ($tab === 'teams'): ?>
-                    <?php if ($match['status'] !== 'stopped'): ?>
+                    <?php if ($canEdit): ?>
                     <button type="button" class="add-toggle-btn" onclick="toggleCard('overlay-add-team')">
                         <span class="plus-icon">+</span>
                     </button>
@@ -370,10 +412,6 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=teams">
                             <input type="hidden" name="action" value="add_team">
                             <div class="form-grid">
-                                <div class="form-field">
-                                    <label for="team_seq">หมายเลข (No)</label>
-                                    <input type="number" id="team_seq" name="sequence_number" placeholder="เช่น 1" required>
-                                </div>
                                 <div class="form-field">
                                     <label for="team_name">ชื่อทีม/นักตกปลา</label>
                                     <input type="text" id="team_name" name="team_name" placeholder="ชื่อทีม" required>
@@ -390,15 +428,15 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <tr>
                             <th>No</th>
                             <th>Name</th>
-                            <?php if ($match['status'] !== 'stopped'): ?>
+                            <?php if ($canEdit): ?>
                             <th>Action</th>
                             <?php endif; ?>
                         </tr>
                         <?php foreach ($teams as $team): ?>
                         <tr>
-                            <td><?= htmlspecialchars($team['sequence_number']) ?></td>
+                            <td><?= sprintf('%02d', $team['sequence_number']) ?></td>
                             <td><?= htmlspecialchars($team['team_name']) ?></td>
-                            <?php if ($match['status'] !== 'stopped'): ?>
+                            <?php if ($canEdit): ?>
                             <td>
                                 <div class="row-actions">
                                     <button type="button" class="edit-btn" onclick="toggleCard('overlay-edit-team-<?= htmlspecialchars($team['id']) ?>')">แก้ไข</button>
@@ -438,7 +476,7 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </table>
 
                 <?php elseif ($tab === 'logs'): ?>
-                    <?php if ($match['status'] !== 'stopped'): ?>
+                    <?php if ($canEdit): ?>
                     <button type="button" class="add-toggle-btn" onclick="toggleCard('overlay-add-log')">
                         <span class="plus-icon">+</span>
                     </button>
@@ -492,7 +530,7 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <th>Category</th>
                             <th>Weight</th>
                             <th>Time</th>
-                            <?php if ($match['status'] !== 'stopped'): ?>
+                            <?php if ($canEdit): ?>
                             <th>Action</th>
                             <?php endif; ?>
                         </tr>
@@ -502,7 +540,7 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td><?= htmlspecialchars($log['cat_name']) ?></td>
                             <td><?= htmlspecialchars($log['weight']) ?></td>
                             <td><?= htmlspecialchars(date('H:i:s', strtotime($log['caught_at']))) ?></td>
-                            <?php if ($match['status'] !== 'stopped'): ?>
+                            <?php if ($canEdit): ?>
                             <td>
                                 <div class="row-actions">
                                     <button type="button" class="edit-btn" onclick="toggleCard('overlay-edit-log-<?= htmlspecialchars($log['id']) ?>')">แก้ไข</button>
