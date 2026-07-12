@@ -90,6 +90,7 @@ foreach ($categories as $cat) {
             <?php if (count($categories) > 0): ?>
                 <?php foreach ($categories as $cat): ?>
                 <h3 style="margin: 20px 0 20px;"><?= htmlspecialchars($cat['name']) ?> (Top 5)</h3>
+                <div class="table-scroll">
                 <table>
                     <tr>
                         <th>อันดับ</th>
@@ -100,10 +101,10 @@ foreach ($categories as $cat) {
                         <?php if (count($rankingsByCategory[$cat['id']]) > 0): ?>
                             <?php $rank = 1; foreach ($rankingsByCategory[$cat['id']] as $row): ?>
                             <tr>
-                                <td><?= $rank++ ?></td>
-                                <td><?= htmlspecialchars($row['team_name']) ?></td>
-                                <td><?= htmlspecialchars($row['max_weight']) ?></td>
-                                <td><?= htmlspecialchars(date('H:i:s', strtotime($row['first_caught']))) ?></td>
+                                <td data-label="อันดับ"><?= $rank++ ?></td>
+                                <td data-label="ทีม"><?= htmlspecialchars($row['team_name']) ?></td>
+                                <td data-label="น้ำหนัก"><?= htmlspecialchars($row['max_weight']) ?></td>
+                                <td data-label="เวลา"><?= htmlspecialchars(date('H:i:s', strtotime($row['first_caught']))) ?></td>
                             </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -112,6 +113,7 @@ foreach ($categories as $cat) {
                             </tr>
                         <?php endif; ?>
                 </table>
+                </div>
                 <?php endforeach; ?>
             <?php else: ?>
                 <p style="text-align:center; margin-top: 20px;">No categories found</p>

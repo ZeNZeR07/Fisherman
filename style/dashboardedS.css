@@ -3,13 +3,15 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Noto Sans Thai", "Leelawadee UI", "Segoe UI", Tahoma, Arial, sans-serif;
 }
 
 /* Background */
 body{
     min-height: 100vh;
     background: linear-gradient(135deg, #f4f6f9, #dfe9f3);
+    font-size: 18px;
+    line-height: 1.65;
 }
 
 .navbar{
@@ -35,7 +37,7 @@ body{
 .nav-menu a{
     color: white;
     text-decoration: none;
-    font-size: 16px;
+    font-size: 18px;
     transition: .3s;
 }
 
@@ -67,7 +69,7 @@ body{
     text-align: center;
     color: #1e293b;
     margin-bottom: 40px;
-    font-size: 2rem;
+    font-size: 2.2rem;
 }
 
 /* Header row (back button + title) */
@@ -93,6 +95,7 @@ body{
     padding: 10px 20px;
     cursor: pointer;
     font-weight: bold;
+    font-size: 16px;
     background: #9dd6e6;
     color: #ffffff;
     white-space: nowrap;
@@ -101,6 +104,14 @@ body{
 
 .back-btn:hover{
     background: #69a0af;
+}
+
+/* Lets a wide table scroll horizontally on narrow screens instead of
+   squeezing columns unreadably. */
+.table-scroll{
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Table */
@@ -117,16 +128,32 @@ table{
 th{
     background: #7aaae9;
     color: white;
-    padding: 15px;
-    font-size: 16px;
+    padding: 17px;
+    font-size: 18px;
+    font-weight: 700;
 }
 
 /* Data */
 td{
-    padding: 14px;
+    padding: 16px;
     text-align: center;
     border-bottom: 1px solid #e5e7eb;
     color: #374151;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+/* อันดับ/น้ำหนัก/เวลา เป็นข้อมูลรูปแบบสั้นตายตัว ให้ย่อตามเนื้อหา
+   ส่วนคอลัมน์ "ทีม" (ชื่อทีม ความยาวไม่แน่นอน) รับพื้นที่ที่เหลือ */
+th:nth-child(1), td:nth-child(1),
+th:nth-child(3), td:nth-child(3),
+th:nth-child(4), td:nth-child(4){
+    width: 1%;
+    white-space: nowrap;
+}
+
+th:nth-child(2), td:nth-child(2){
+    text-align: left;
 }
 
 /* Hover */
@@ -142,17 +169,189 @@ tr:nth-child(even){
 
 /* Responsive */
 @media (max-width: 768px){
+    .navbar{
+        height: auto;
+        min-height: 50px;
+        padding: 10px 16px;
+        column-gap: 16px;
+        flex-wrap: wrap;
+        row-gap: 8px;
+    }
+
+    .logo h2{
+        font-size: 18px;
+    }
+
+    .container{
+        width: 94%;
+        margin: 24px auto;
+    }
+
     .card{
         padding: 20px;
     }
 
+    .card-header{
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .card-header .spacer{
+        display: none;
+    }
+
+    .card-header h2{
+        order: 2;
+        width: 100%;
+    }
+
+    .back-btn{
+        order: 1;
+    }
+
     th,
     td{
-        padding: 10px;
-        font-size: 14px;
+        padding: 11px;
+        font-size: 16px;
     }
 
     .card h2{
-        font-size: 1.5rem;
+        font-size: 1.7rem;
+        margin-bottom: 0;
+    }
+
+    table{
+        margin-bottom: 24px;
+    }
+
+    /* Stacked "card" table: each row becomes a labelled card instead of
+       scrolling sideways, so nothing is ever hidden off-screen on narrow phones. */
+    th:nth-child(1), td:nth-child(1),
+    th:nth-child(3), td:nth-child(3),
+    th:nth-child(4), td:nth-child(4){
+        width: auto;
+        white-space: normal;
+    }
+
+    th:nth-child(2), td:nth-child(2){
+        text-align: right;
+    }
+
+    tr:first-child{
+        display: none;
+    }
+
+    tr{
+        display: block;
+        margin-bottom: 10px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    tr:last-child{
+        margin-bottom: 0;
+    }
+
+    td{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        text-align: right;
+    }
+
+    td:last-child{
+        border-bottom: none;
+    }
+
+    td::before{
+        content: attr(data-label);
+        font-weight: 700;
+        color: #6b7280;
+        font-size: 14px;
+        letter-spacing: 0.3px;
+    }
+
+    td[colspan]{
+        display: block;
+        text-align: center;
+    }
+
+    td[colspan]::before{
+        content: none;
+    }
+}
+
+/* Large screens / TV */
+@media (min-width: 1600px){
+    body{
+        font-size: 20px;
+    }
+
+    .container{
+        max-width: 1300px;
+    }
+
+    .navbar{
+        height: 64px;
+    }
+
+    .logo h2{
+        font-size: 27px;
+    }
+
+    .card h2{
+        font-size: 2.6rem;
+    }
+
+    th,
+    td{
+        padding: 20px;
+        font-size: 20px;
+    }
+
+    .back-btn{
+        padding: 13px 28px;
+        font-size: 17px;
+    }
+}
+
+/* Very large displays (4K / TV viewed from a distance) */
+@media (min-width: 2200px){
+    body{
+        font-size: 25px;
+    }
+
+    .container{
+        max-width: 1900px;
+    }
+
+    .navbar{
+        height: 80px;
+    }
+
+    .logo h2{
+        font-size: 34px;
+    }
+
+    .nav-menu a{
+        font-size: 25px;
+    }
+
+    .card h2{
+        font-size: 3.4rem;
+    }
+
+    th,
+    td{
+        padding: 26px;
+        font-size: 25px;
+    }
+
+    .back-btn{
+        padding: 16px 34px;
+        font-size: 21px;
     }
 }
