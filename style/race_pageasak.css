@@ -7,7 +7,7 @@
 
 body{
     background: #f3f4f6;
-    font-size: 18px;
+    font-size: 22px;
     line-height: 1.65;
 }
 
@@ -223,7 +223,7 @@ td {
     text-align: center;
     border: none;
     border-bottom: 1px solid #e5e7eb;
-    font-size: 18px;
+    font-size: 22px;
 }
 
 th {
@@ -235,8 +235,8 @@ th {
 
 td {
     background: #ffffff;
-    color: #1f2937;
-    font-weight: 500;
+    color: #111827;
+    font-weight: 700;
 }
 
 tr:last-child td {

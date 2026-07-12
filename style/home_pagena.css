@@ -9,7 +9,7 @@ body{
     margin: 0;
     background: #ffffff;
     min-height: 100vh;
-    font-size: 18px;
+    font-size: 22px;
     line-height: 1.65;
 }
 
@@ -81,18 +81,19 @@ th,
 td{
     padding: 16px 18px;
     vertical-align: middle;
-    font-size: 18px;
+    font-size: 22px;
 }
 
 th{
     background: #7aaae9;
     color: white;
-    font-size: 18px;
+    font-size: 22px;
     font-weight: 700;
 }
 
 td{
-    font-weight: 500;
+    color: #111827;
+    font-weight: 700;
 }
 
 /* Text columns (e.g. race name) take the remaining space and stay left-aligned */
@@ -401,7 +402,7 @@ td{
         gap: 12px;
         padding: 13px 14px;
         font-size: 16px;
-        font-weight: 500;
+        font-weight: 700;
         border-bottom: 1px solid #f1f5f9;
     }
 
