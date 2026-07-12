@@ -37,23 +37,30 @@ $rankingsByCategory = [];
 // for each category. Closing the cursor after every fetchAll() prevents
 // "previous statement still active" issues that stop later iterations
 // from returning data (a common cause of "first table works, next ones don't").
+// Ranking rule: each team's best catch is the one closest to the category's
+// target weight (min_weight); rank 1 = smallest difference, and the list is
+// capped at the category's prize_quota.
 $rankStmt = $pdo->prepare("
-    SELECT t.sequence_number, t.team_name, MAX(cl.weight) as max_weight, MIN(cl.caught_at) as first_caught
-    FROM catch_logs cl
-    JOIN teams t ON cl.team_id = t.id
-    WHERE cl.match_id = ?
-      AND cl.category_id = ?
-      AND cl.weight >= ?
-    GROUP BY t.id
-    ORDER BY max_weight DESC, first_caught ASC
+    SELECT sequence_number, team_name, weight AS best_weight, caught_at AS first_caught, diff
+    FROM (
+        SELECT t.sequence_number, t.team_name, t.id AS team_id, cl.weight, cl.caught_at,
+               ABS(cl.weight - ?) AS diff,
+               ROW_NUMBER() OVER (PARTITION BY t.id ORDER BY ABS(cl.weight - ?) ASC, cl.caught_at ASC) AS rn
+        FROM catch_logs cl
+        JOIN teams t ON cl.team_id = t.id
+        WHERE cl.match_id = ? AND cl.category_id = ?
+    ) best_catches
+    WHERE rn = 1
+    ORDER BY diff ASC, first_caught ASC
     LIMIT ?
 ");
 
 foreach ($categories as $cat) {
-    $rankStmt->bindValue(1, $match_id, PDO::PARAM_INT);
-    $rankStmt->bindValue(2, $cat['id'], PDO::PARAM_INT);
-    $rankStmt->bindValue(3, $cat['min_weight'], PDO::PARAM_STR);
-    $rankStmt->bindValue(4, 5, PDO::PARAM_INT);
+    $rankStmt->bindValue(1, $cat['min_weight'], PDO::PARAM_STR);
+    $rankStmt->bindValue(2, $cat['min_weight'], PDO::PARAM_STR);
+    $rankStmt->bindValue(3, $match_id, PDO::PARAM_INT);
+    $rankStmt->bindValue(4, $cat['id'], PDO::PARAM_INT);
+    $rankStmt->bindValue(5, (int)$cat['prize_quota'], PDO::PARAM_INT);
     $rankStmt->execute();
     $rankingsByCategory[$cat['id']] = $rankStmt->fetchAll(PDO::FETCH_ASSOC);
     $rankStmt->closeCursor(); // release the result set before the next iteration reuses the statement
@@ -89,13 +96,14 @@ foreach ($categories as $cat) {
 
             <?php if (count($categories) > 0): ?>
                 <?php foreach ($categories as $cat): ?>
-                <h3 style="margin: 20px 0 20px;"><?= htmlspecialchars($cat['name']) ?> (Top 5)</h3>
+                <h3 style="margin: 20px 0 20px;"><?= htmlspecialchars($cat['name']) ?> (Top <?= htmlspecialchars($cat['prize_quota']) ?>)</h3>
                 <div class="table-scroll">
                 <table>
                     <tr>
                         <th>อันดับ</th>
                         <th>ทีม</th>
                         <th>น้ำหนัก</th>
+                        <th>ห่างจากเป้าหมาย</th>
                         <th>เวลา</th>
                     </tr>
                         <?php if (count($rankingsByCategory[$cat['id']]) > 0): ?>
@@ -103,13 +111,14 @@ foreach ($categories as $cat) {
                             <tr>
                                 <td><?= $rank++ ?></td>
                                 <td><?= htmlspecialchars($row['team_name']) ?></td>
-                                <td><?= htmlspecialchars($row['max_weight']) ?></td>
+                                <td><?= htmlspecialchars($row['best_weight']) ?></td>
+                                <td><?= htmlspecialchars(number_format((float)$row['diff'], 2)) ?></td>
                                 <td><?= htmlspecialchars(date('H:i:s', strtotime($row['first_caught']))) ?></td>
                             </tr>
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="4">No catches yet</td>
+                                <td colspan="5">No catches yet</td>
                             </tr>
                         <?php endif; ?>
                 </table>

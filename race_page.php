@@ -326,7 +326,7 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <input type="text" id="cat_name" name="name" placeholder="เช่น ปลานิล" required>
                                 </div>
                                 <div class="form-field">
-                                    <label for="cat_min_weight">น้ำหนักขั้นต่ำ (กก.)</label>
+                                    <label for="cat_min_weight">น้ำหนักที่กำหนด (กก.)</label>
                                     <input type="number" step="0.01" id="cat_min_weight" name="min_weight" placeholder="0.00" required>
                                 </div>
                                 <div class="form-field">
@@ -346,7 +346,7 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <tr>
                             <th class="col-fit">ID</th>
                             <th class="col-fluid">Category</th>
-                            <th class="col-fit">Min Wgt</th>
+                            <th class="col-fit">Target Wgt</th>
                             <th class="col-fit">Quota</th>
                             <?php if ($canEdit): ?>
                             <th class="col-fit">Action</th>
@@ -382,7 +382,7 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                             <input type="text" name="name" value="<?= htmlspecialchars($cat['name']) ?>" required>
                                         </div>
                                         <div class="form-field">
-                                            <label>น้ำหนักขั้นต่ำ (กก.)</label>
+                                            <label>น้ำหนักที่กำหนด (กก.)</label>
                                             <input type="number" step="0.01" name="min_weight" value="<?= htmlspecialchars($cat['min_weight']) ?>" required>
                                         </div>
                                         <div class="form-field">
@@ -598,26 +598,30 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
 
                 <?php elseif ($tab === 'dashboard'): ?>
-                    <!-- Live Dashboard: Calculate rankings per category -->
+                    <!-- Live Dashboard: rank each team by how close their best catch is to the target weight -->
                     <?php foreach ($categories as $cat): ?>
                         <h3 style="margin-top: 15px;"><?= htmlspecialchars($cat['name']) ?> Leaderboard (Top <?= htmlspecialchars($cat['prize_quota']) ?>)</h3>
                         <?php
                         $stmt = $pdo->prepare("
-                            SELECT t.sequence_number, t.team_name, MAX(cl.weight) as max_weight, MIN(cl.caught_at) as first_caught
-                            FROM catch_logs cl
-                            JOIN teams t ON cl.team_id = t.id
-                            WHERE cl.match_id = ? 
-                              AND cl.category_id = ? 
-                              AND cl.weight >= ?
-                            GROUP BY t.id
-                            ORDER BY max_weight DESC, first_caught ASC
+                            SELECT sequence_number, team_name, weight AS best_weight, caught_at AS first_caught, diff
+                            FROM (
+                                SELECT t.sequence_number, t.team_name, t.id AS team_id, cl.weight, cl.caught_at,
+                                       ABS(cl.weight - ?) AS diff,
+                                       ROW_NUMBER() OVER (PARTITION BY t.id ORDER BY ABS(cl.weight - ?) ASC, cl.caught_at ASC) AS rn
+                                FROM catch_logs cl
+                                JOIN teams t ON cl.team_id = t.id
+                                WHERE cl.match_id = ? AND cl.category_id = ?
+                            ) best_catches
+                            WHERE rn = 1
+                            ORDER BY diff ASC, first_caught ASC
                             LIMIT ?
                         ");
                         // We must cast prize_quota to int for LIMIT clause with emulate_prepares=false
-                        $stmt->bindValue(1, $match_id, PDO::PARAM_INT);
-                        $stmt->bindValue(2, $cat['id'], PDO::PARAM_INT);
-                        $stmt->bindValue(3, $cat['min_weight'], PDO::PARAM_STR);
-                        $stmt->bindValue(4, (int)$cat['prize_quota'], PDO::PARAM_INT);
+                        $stmt->bindValue(1, $cat['min_weight'], PDO::PARAM_STR);
+                        $stmt->bindValue(2, $cat['min_weight'], PDO::PARAM_STR);
+                        $stmt->bindValue(3, $match_id, PDO::PARAM_INT);
+                        $stmt->bindValue(4, $cat['id'], PDO::PARAM_INT);
+                        $stmt->bindValue(5, (int)$cat['prize_quota'], PDO::PARAM_INT);
                         $stmt->execute();
                         $rankings = $stmt->fetchAll();
                         ?>
@@ -628,13 +632,15 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <th class="col-fit">No</th>
                                 <th class="col-fluid">Name</th>
                                 <th class="col-fit">Weight (kg)</th>
+                                <th class="col-fit">ห่างจากเป้าหมาย</th>
                             </tr>
                             <?php $rank = 1; foreach ($rankings as $row): ?>
                             <tr>
                                 <td class="col-fit" data-label="Rank"><?= $rank++ ?></td>
                                 <td class="col-fit" data-label="No"><?= htmlspecialchars($row['sequence_number']) ?></td>
                                 <td class="col-fluid" data-label="Name"><?= htmlspecialchars($row['team_name']) ?></td>
-                                <td class="col-fit" data-label="Weight (kg)"><?= htmlspecialchars($row['max_weight']) ?></td>
+                                <td class="col-fit" data-label="Weight (kg)"><?= htmlspecialchars($row['best_weight']) ?></td>
+                                <td class="col-fit" data-label="ห่างจากเป้าหมาย"><?= htmlspecialchars(number_format((float)$row['diff'], 2)) ?></td>
                             </tr>
                             <?php endforeach; ?>
                         </table>
