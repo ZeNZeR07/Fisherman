@@ -2,11 +2,13 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: "Noto Sans Thai", "Leelawadee UI", "Segoe UI", Tahoma, Arial, sans-serif;
 }
 
 body{
     background: #f3f4f6;
+    font-size: 18px;
+    line-height: 1.65;
 }
 
 .navbar{
@@ -32,7 +34,7 @@ body{
 .nav-menu a{
     color: white;
     text-decoration: none;
-    font-size: 16px;
+    font-size: 18px;
     transition: .3s;
 }
 
@@ -65,13 +67,13 @@ body{
 }
 
 .text-box h1{
-    font-size: 28px;
+    font-size: 31px;
     color: #222;
     margin-bottom: 5px;
 }
 
 .text-box h3{
-    font-size: 15px;
+    font-size: 17px;
     font-weight: normal;
     color: #777;
     margin-bottom: 30px;
@@ -89,6 +91,7 @@ body{
     padding: 10px 20px;
     cursor: pointer;
     font-weight: bold;
+    font-size: 16px;
 }
  
 .btu-box button:first-child {
@@ -114,7 +117,7 @@ body{
     padding: 10px 20px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 16px;
     transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
 }
  
@@ -180,6 +183,7 @@ body{
     border-radius: 10px;
     cursor: pointer;
     color: #555;
+    font-size: 16px;
 }
 
 .menu button:hover{
@@ -200,6 +204,14 @@ body{
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
+/* Lets a wide table scroll horizontally on narrow screens instead of
+   squeezing columns unreadably. */
+.table-scroll{
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -207,22 +219,24 @@ table {
 
 th,
 td {
-    padding: 12px 16px;
+    padding: 16px 18px;
     text-align: center;
     border: none;
     border-bottom: 1px solid #e5e7eb;
+    font-size: 18px;
 }
 
 th {
     background: #7aaae9;
     color: #ffffff;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: 0.2px;
 }
 
 td {
     background: #ffffff;
     color: #1f2937;
+    font-weight: 500;
 }
 
 tr:last-child td {
@@ -233,9 +247,16 @@ tr:nth-child(even) td {
     background: #f9fafb;
 }
 
-td:first-child {
-    width: 80px;
+/* Short, fixed-format columns (ID, No, Rank, Weight, Time, Action) shrink to fit their content */
+.col-fit {
+    width: 1%;
+    white-space: nowrap;
     text-align: center;
+}
+
+/* Text columns (Category, Name, Team) take the remaining space and stay left-aligned */
+.col-fluid {
+    text-align: left;
 }
 
         .form-card {
@@ -249,7 +270,7 @@ td:first-child {
         }
         .form-card h4 {
             margin: 0 0 16px 0;
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 700;
             color: #1f2937;
             display: flex;
@@ -275,7 +296,7 @@ td:first-child {
             gap: 6px;
         }
         .form-field label {
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 600;
             color: #4b5563;
         }
@@ -284,7 +305,7 @@ td:first-child {
             padding: 9px 12px;
             border: 1px solid #d1d5db;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 16px;
             background: #f9fafb;
             transition: border-color 0.15s, box-shadow 0.15s;
         }
@@ -304,7 +325,7 @@ td:first-child {
             color: #fff;
             border: none;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: background 0.15s;
@@ -402,8 +423,8 @@ td:first-child {
         .row-actions button {
             border: none;
             border-radius: 6px;
-            padding: 6px 12px;
-            font-size: 13px;
+            padding: 8px 14px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             color: #fff;
@@ -421,3 +442,252 @@ td:first-child {
         .row-actions .delete-btn:hover {
             background: #dc2626;
         }
+
+/* ===================== Responsive ===================== */
+
+/* Tablet */
+@media (max-width: 900px){
+    .container{
+        max-width: 92%;
+    }
+}
+
+/* Mobile */
+@media (max-width: 700px){
+    .navbar{
+        height: auto;
+        min-height: 50px;
+        padding: 10px 16px;
+        flex-wrap: wrap;
+        row-gap: 8px;
+        column-gap: 16px;
+    }
+
+    .logo h2{
+        font-size: 18px;
+    }
+
+    .container{
+        width: 94%;
+        padding: 16px;
+        margin-top: 16px;
+        margin-bottom: 32px;
+    }
+
+    .col-1{
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .text-box h1{
+        font-size: 24px;
+    }
+
+    .btu-box,
+    .btu-box a{
+        width: 100%;
+    }
+
+    .btu-box button{
+        width: 100%;
+    }
+
+    .match-controls{
+        flex-wrap: wrap;
+    }
+
+    .match-controls button{
+        flex: 1 1 auto;
+    }
+
+    .menu{
+        flex-wrap: wrap;
+    }
+
+    .menu button{
+        flex: 1 1 30%;
+        font-size: 15px;
+        padding: 10px 6px;
+    }
+
+    /* Stacked "card" table: each row becomes a labelled card instead of
+       scrolling sideways, so nothing is ever hidden off-screen on narrow phones. */
+    .col-fit,
+    .col-fluid{
+        width: auto;
+        white-space: normal;
+        text-align: right;
+    }
+
+    tr:first-child{
+        display: none;
+    }
+
+    tr{
+        display: block;
+        margin-bottom: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #fff;
+    }
+
+    tr:last-child{
+        margin-bottom: 0;
+    }
+
+    tr:nth-child(even) td{
+        background: #fff;
+    }
+
+    td{
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        font-size: 16px;
+    }
+
+    td:last-child{
+        border-bottom: none;
+    }
+
+    td::before{
+        content: attr(data-label);
+        font-weight: 700;
+        color: #6b7280;
+        font-size: 14px;
+        letter-spacing: 0.3px;
+    }
+
+    td[colspan]{
+        display: block;
+        text-align: center;
+    }
+
+    td[colspan]::before{
+        content: none;
+    }
+
+    .row-actions{
+        gap: 8px;
+    }
+
+    .row-actions button{
+        padding: 9px 15px;
+    }
+
+    .add-toggle-btn{
+        width: 36px;
+        height: 36px;
+        margin: 6px 6px 6px auto;
+    }
+
+    .form-card{
+        width: 92%;
+        padding: 18px;
+    }
+}
+
+/* Large screens / TV */
+@media (min-width: 1600px){
+    body{
+        font-size: 20px;
+    }
+
+    .container{
+        max-width: 1100px;
+    }
+
+    .navbar{
+        height: 64px;
+    }
+
+    .logo h2{
+        font-size: 27px;
+    }
+
+    .text-box h1{
+        font-size: 37px;
+    }
+
+    .text-box h3{
+        font-size: 19px;
+    }
+
+    th, td{
+        padding: 18px 22px;
+        font-size: 20px;
+    }
+
+    .menu button{
+        font-size: 18px;
+        padding: 17px;
+    }
+
+    .match-controls button,
+    .btu-box button{
+        font-size: 17px;
+        padding: 13px 27px;
+    }
+}
+
+/* Very large displays (4K / TV viewed from a distance) */
+@media (min-width: 2200px){
+    body{
+        font-size: 25px;
+    }
+
+    .container{
+        max-width: 1500px;
+    }
+
+    .navbar{
+        height: 80px;
+    }
+
+    .logo h2{
+        font-size: 34px;
+    }
+
+    .nav-menu a{
+        font-size: 25px;
+    }
+
+    .text-box h1{
+        font-size: 48px;
+    }
+
+    .text-box h3{
+        font-size: 24px;
+    }
+
+    th, td{
+        padding: 24px 28px;
+        font-size: 25px;
+    }
+
+    .menu button{
+        font-size: 23px;
+        padding: 22px;
+    }
+
+    .match-controls button,
+    .btu-box button{
+        font-size: 21px;
+        padding: 16px 34px;
+    }
+
+    .row-actions button{
+        font-size: 19px;
+        padding: 11px 21px;
+    }
+
+    .add-toggle-btn{
+        width: 52px;
+        height: 52px;
+        font-size: 22px;
+    }
+}

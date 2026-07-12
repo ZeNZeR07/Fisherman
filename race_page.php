@@ -341,24 +341,25 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                     </div>
                     <?php endif; ?>
+                    <div class="table-scroll">
                     <table>
                         <tr>
-                            <th>ID</th>
-                            <th>Category</th>
-                            <th>Min Wgt</th>
-                            <th>Quota</th>
+                            <th class="col-fit">ID</th>
+                            <th class="col-fluid">Category</th>
+                            <th class="col-fit">Min Wgt</th>
+                            <th class="col-fit">Quota</th>
                             <?php if ($canEdit): ?>
-                            <th>Action</th>
+                            <th class="col-fit">Action</th>
                             <?php endif; ?>
                         </tr>
                         <?php foreach ($categories as $cat): ?>
                         <tr>
-                            <td><?= htmlspecialchars($cat['id']) ?></td>
-                            <td><?= htmlspecialchars($cat['name']) ?></td>
-                            <td><?= htmlspecialchars($cat['min_weight']) ?></td>
-                            <td><?= htmlspecialchars($cat['prize_quota']) ?></td>
+                            <td class="col-fit" data-label="ID"><?= htmlspecialchars($cat['id']) ?></td>
+                            <td class="col-fluid" data-label="Category"><?= htmlspecialchars($cat['name']) ?></td>
+                            <td class="col-fit" data-label="Min Wgt"><?= htmlspecialchars($cat['min_weight']) ?></td>
+                            <td class="col-fit" data-label="Quota"><?= htmlspecialchars($cat['prize_quota']) ?></td>
                             <?php if ($canEdit): ?>
-                            <td>
+                            <td class="col-fit" data-label="Action">
                                 <div class="row-actions">
                                     <button type="button" class="edit-btn" onclick="toggleCard('overlay-edit-category-<?= htmlspecialchars($cat['id']) ?>')">แก้ไข</button>
                                     <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=categories" style="display:inline;" onsubmit="return confirm('ลบประเภท &quot;<?= htmlspecialchars(addslashes($cat['name'])) ?>&quot; ใช่หรือไม่? บันทึกการจับปลาในประเภทนี้จะถูกลบด้วย');">
@@ -399,6 +400,7 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </tr>
                         <?php endforeach; ?>
                     </table>
+                    </div>
 
                 <?php elseif ($tab === 'teams'): ?>
                     <?php if ($canEdit): ?>
@@ -424,20 +426,21 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                     </div>
                     <?php endif; ?>
+                    <div class="table-scroll">
                     <table>
                         <tr>
-                            <th>No</th>
-                            <th>Name</th>
+                            <th class="col-fit">No</th>
+                            <th class="col-fluid">Name</th>
                             <?php if ($canEdit): ?>
-                            <th>Action</th>
+                            <th class="col-fit">Action</th>
                             <?php endif; ?>
                         </tr>
                         <?php foreach ($teams as $team): ?>
                         <tr>
-                            <td><?= sprintf('%02d', $team['sequence_number']) ?></td>
-                            <td><?= htmlspecialchars($team['team_name']) ?></td>
+                            <td class="col-fit" data-label="No"><?= sprintf('%02d', $team['sequence_number']) ?></td>
+                            <td class="col-fluid" data-label="Name"><?= htmlspecialchars($team['team_name']) ?></td>
                             <?php if ($canEdit): ?>
-                            <td>
+                            <td class="col-fit" data-label="Action">
                                 <div class="row-actions">
                                     <button type="button" class="edit-btn" onclick="toggleCard('overlay-edit-team-<?= htmlspecialchars($team['id']) ?>')">แก้ไข</button>
                                     <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=teams" style="display:inline;" onsubmit="return confirm('ลบทีม &quot;<?= htmlspecialchars(addslashes($team['team_name'])) ?>&quot; ใช่หรือไม่? บันทึกการจับปลาของทีมนี้จะถูกลบด้วย');">
@@ -474,6 +477,7 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </tr>
                         <?php endforeach; ?>
                     </table>
+                    </div>
 
                 <?php elseif ($tab === 'logs'): ?>
                     <?php if ($canEdit): ?>
@@ -524,24 +528,25 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                            WHERE cl.match_id = ? ORDER BY cl.caught_at DESC");
                     $logs->execute([$match_id]);
                     ?>
+                    <div class="table-scroll">
                     <table>
                         <tr>
-                            <th>Team</th>
-                            <th>Category</th>
-                            <th>Weight</th>
-                            <th>Time</th>
+                            <th class="col-fluid">Team</th>
+                            <th class="col-fluid">Category</th>
+                            <th class="col-fit">Weight</th>
+                            <th class="col-fit">Time</th>
                             <?php if ($canEdit): ?>
-                            <th>Action</th>
+                            <th class="col-fit">Action</th>
                             <?php endif; ?>
                         </tr>
                         <?php foreach ($logs->fetchAll() as $log): ?>
                         <tr>
-                            <td><?= htmlspecialchars($log['team_name']) ?></td>
-                            <td><?= htmlspecialchars($log['cat_name']) ?></td>
-                            <td><?= htmlspecialchars($log['weight']) ?></td>
-                            <td><?= htmlspecialchars(date('H:i:s', strtotime($log['caught_at']))) ?></td>
+                            <td class="col-fluid" data-label="Team"><?= htmlspecialchars($log['team_name']) ?></td>
+                            <td class="col-fluid" data-label="Category"><?= htmlspecialchars($log['cat_name']) ?></td>
+                            <td class="col-fit" data-label="Weight"><?= htmlspecialchars($log['weight']) ?></td>
+                            <td class="col-fit" data-label="Time"><?= htmlspecialchars(date('H:i:s', strtotime($log['caught_at']))) ?></td>
                             <?php if ($canEdit): ?>
-                            <td>
+                            <td class="col-fit" data-label="Action">
                                 <div class="row-actions">
                                     <button type="button" class="edit-btn" onclick="toggleCard('overlay-edit-log-<?= htmlspecialchars($log['id']) ?>')">แก้ไข</button>
                                     <form method="POST" action="race_page.php?match_id=<?= htmlspecialchars($match_id) ?>&tab=logs" style="display:inline;" onsubmit="return confirm('ลบบันทึกการจับปลาของทีม &quot;<?= htmlspecialchars(addslashes($log['team_name'])) ?>&quot; ใช่หรือไม่?');">
@@ -590,6 +595,7 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </tr>
                         <?php endforeach; ?>
                     </table>
+                    </div>
 
                 <?php elseif ($tab === 'dashboard'): ?>
                     <!-- Live Dashboard: Calculate rankings per category -->
@@ -615,22 +621,24 @@ $teams = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         $stmt->execute();
                         $rankings = $stmt->fetchAll();
                         ?>
+                        <div class="table-scroll">
                         <table>
                             <tr>
-                                <th>Rank</th>
-                                <th>No</th>
-                                <th>Name</th>
-                                <th>Weight (kg)</th>
+                                <th class="col-fit">Rank</th>
+                                <th class="col-fit">No</th>
+                                <th class="col-fluid">Name</th>
+                                <th class="col-fit">Weight (kg)</th>
                             </tr>
                             <?php $rank = 1; foreach ($rankings as $row): ?>
                             <tr>
-                                <td><?= $rank++ ?></td>
-                                <td><?= htmlspecialchars($row['sequence_number']) ?></td>
-                                <td><?= htmlspecialchars($row['team_name']) ?></td>
-                                <td><?= htmlspecialchars($row['max_weight']) ?></td>
+                                <td class="col-fit" data-label="Rank"><?= $rank++ ?></td>
+                                <td class="col-fit" data-label="No"><?= htmlspecialchars($row['sequence_number']) ?></td>
+                                <td class="col-fluid" data-label="Name"><?= htmlspecialchars($row['team_name']) ?></td>
+                                <td class="col-fit" data-label="Weight (kg)"><?= htmlspecialchars($row['max_weight']) ?></td>
                             </tr>
                             <?php endforeach; ?>
                         </table>
+                        </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div>

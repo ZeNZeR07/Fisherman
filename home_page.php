@@ -102,28 +102,29 @@ $status_labels = [
             </div>
 
             <div class="border">
-                <table style="width: 100%; table-layout: fixed; border-collapse: collapse;">
+                <div class="table-scroll">
+                <table>
                     <tr>
-                        <th style="text-align: center;">RACE NAME</th>
-                        <th style="text-align: center;">DATE</th>
-                        <th style="text-align: center;">STATUS</th>
-                        <th style="text-align: center;">ACTION</th>
+                        <th class="col-fluid">RACE NAME</th>
+                        <th class="col-fit">DATE</th>
+                        <th class="col-fit">STATUS</th>
+                        <th class="col-fit">ACTION</th>
                     </tr>
                     <?php if (count($matches) > 0): ?>
                         <?php foreach ($matches as $match): ?>
                         <tr>
-                            <td style="padding-left:11%;">
+                            <td class="col-fluid" data-label="RACE NAME">
                                 <a href="race_page.php?match_id=<?= htmlspecialchars($match['id']) ?>" style="text-decoration: none; color: inherit;">
                                     <?= htmlspecialchars($match['name']) ?>
                                 </a>
                             </td>
-                            <td style="text-align: center; ">
+                            <td class="col-fit" data-label="DATE">
                                 <?= htmlspecialchars(date('d/m/Y', strtotime($match['created_at']))) ?>
                             </td>
-                            <td style="padding-left:80px;">
+                            <td class="col-fit" data-label="STATUS">
                                 <?= htmlspecialchars($status_labels[$match['status']] ?? ucfirst($match['status'])) ?>
                             </td>
-                            <td style="text-align: center; ">
+                            <td class="col-fit" data-label="ACTION">
                                 <div class="row-actions">
                                     <button type="button" class="edit-btn" data-id="<?= htmlspecialchars($match['id']) ?>" data-name="<?= htmlspecialchars($match['name'], ENT_QUOTES) ?>" onclick="openEditMatchModal(this)">แก้ไข</button>
                                     <form method="POST" style="display:inline;" onsubmit="return confirm('ลบการแข่งขัน &quot;<?= htmlspecialchars(addslashes($match['name'])) ?>&quot; ใช่หรือไม่? ข้อมูลทีม/ชนิดปลา/บันทึกน้ำหนักทั้งหมดจะถูกลบด้วย');">
@@ -141,6 +142,7 @@ $status_labels = [
                         </tr>
                     <?php endif; ?>
                 </table>
+                </div>
             </div>
         </div>
     </div>
